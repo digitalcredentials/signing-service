@@ -1,8 +1,8 @@
-import { build } from './app.js'
-import { getConfig, setConfig } from "./config.js";
-import https from "https"
-import http from "http"
-import fs from "fs"
+import https from 'https';
+import http from 'http';
+import fs from 'fs';
+import { build } from './app';
+import { getConfig, setConfig } from './config';
 
 const run = async () => {
   await setConfig()

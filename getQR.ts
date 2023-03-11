@@ -1,6 +1,6 @@
-import * as cborld from '@digitalbazaar/cborld';
+import * as cborld from '@digitalcredentials/cborld';
 import base32Encode from 'base32-encode';
-import {createPresentation} from '@digitalbazaar/vc'
+import {createPresentation} from '@digitalcredentials/vc';
 
 import QRCode from 'qrcode';
 const VP_QR_VERSION = 'VP1';

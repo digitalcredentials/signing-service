@@ -1,9 +1,9 @@
 import fs from 'fs/promises';
 import { generateSecretKeySeed, decodeSecretKeySeed } from '@digitalcredentials/bnid';
 
-let CONFIG = null;
+let CONFIG;
 
-let DID_SEED = null;
+let DID_SEED;
 
 export function setConfig() {
   CONFIG = parseConfig();
@@ -29,7 +29,7 @@ function parseConfig() {
 
 export function getConfig() {
   if (!CONFIG) {
-    setConfig()
+    setConfig();
   }
   return CONFIG;
 }
