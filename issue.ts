@@ -9,7 +9,7 @@ import { getStatusListManager } from './status';
 
 let suite;
 
-const documentLoader = securityLoader().build()
+const documentLoader = securityLoader().build();
 
 const buildSuite = async () => {
     const seed = await getDIDSeed()
@@ -53,4 +53,4 @@ const issue = async (unsignedVerifiableCredential) => {
     return signedCredential
 }
 
-export default issue
+export default issue;

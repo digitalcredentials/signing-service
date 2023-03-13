@@ -23,9 +23,9 @@ export async function getStatusListManager() {
           repoVisibility: credStatusRepoVisibility,
           accessToken: credStatusClientAccessToken,
           didMethod: DidMethod.Key,
-          didSeed: credStatusClientDidSeed,    
+          didSeed: credStatusClientDidSeed,
           signUserCredential: false,
-          signStatusCredential: true 
+          signStatusCredential: true
       });
     }
     return STATUS_LIST_MANAGER;
