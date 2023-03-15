@@ -1,4 +1,4 @@
-import { createStatusListManager } from '@digitalcredentials/status-list-manager-git';
+import { createStatusManager } from '@digitalcredentials/status-list-manager-git';
 import { getConfig } from './config';
 import { DidMethod } from './types';
 
@@ -15,8 +15,8 @@ let STATUS_LIST_MANAGER = null;
 // creates or retrieves status list manager
 export async function getStatusListManager() {
     if (!STATUS_LIST_MANAGER) {
-      STATUS_LIST_MANAGER = await createStatusListManager({
-          clientType: credStatusClientType,
+      STATUS_LIST_MANAGER = await createStatusManager({
+          service: credStatusClientType,
           repoName: credStatusRepoName,
           metaRepoName: credStatusMetaRepoName,
           repoOrgName: credStatusRepoOrgName,
