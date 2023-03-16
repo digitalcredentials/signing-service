@@ -2,8 +2,7 @@ import express from 'express';
 import logger from 'morgan';
 import cors from 'cors';
 import issue from './issue';
-import { getCredentialStatusListManager, verifyStatusRepoAccess } from './middleware';
-import { getStatusListManager } from './status';
+import { getCredentialStatusManager, verifyStatusRepoAccess } from './middleware';
 
 export async function build(opts = {}) {
     var app = express();
@@ -13,16 +12,15 @@ export async function build(opts = {}) {
     app.use(express.urlencoded({ extended: false }));
     app.use(cors());
 
-    await getStatusListManager();
-
-    app.get('/', function (req, res, next) {
+    app.get('/', function(req, res, next) {
         res.send({ status: true, message: 'hello' });
     });
 
-    app.post('/credentials/issue',
-        getCredentialStatusListManager,
+    app.post(
+        '/credentials/issue',
+        getCredentialStatusManager,
         verifyStatusRepoAccess,
-        async (req, res) => {
+        async function(req, res) {
             try {
                 const unSignedVC = req.body;
                 const signedVC = await issue(unSignedVC);
@@ -31,6 +29,7 @@ export async function build(opts = {}) {
                 console.log(error);
                 return res.status(403).json(error);
             }
-        })
+        }
+    )
     return app;
 }

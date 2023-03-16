@@ -5,7 +5,7 @@ import { driver } from '@digitalcredentials/did-method-key';
 import { securityLoader } from '@digitalcredentials/security-document-loader';
 import { issue as sign } from '@digitalcredentials/vc';
 import { getDIDSeed } from './config';
-import { getStatusListManager } from './status';
+import { getStatusManager } from './status';
 
 let suite;
 
@@ -45,10 +45,10 @@ const signVerifiableCredential = async (credential, suite) => {
 // returned VC itself
 
 const issue = async (unsignedVerifiableCredential) => {
-    const credStatusClient = await getStatusListManager();
+    const statusManager = await getStatusManager();
     const {suite, signingDID} = await getSuite()
     unsignedVerifiableCredential.issuer.id = signingDID
-    const vcWithStatusAllocated = await credStatusClient.allocateStatus(unsignedVerifiableCredential)
+    const vcWithStatusAllocated = await statusManager.allocateStatus(unsignedVerifiableCredential)
     const signedCredential = await signVerifiableCredential(vcWithStatusAllocated, suite)
     return signedCredential
 }

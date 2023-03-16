@@ -17,13 +17,13 @@ function parseConfig() {
   return Object.freeze({
     enableHttpsForDev: process.env.ENABLE_HTTPS_FOR_DEV?.toLowerCase() === 'true',
     port: parseInt(process.env.PORT),
-    credStatusClientDidSeed: process.env.CRED_STATUS_CLIENT_DID_SEED,
-    credStatusClientType: process.env.CRED_STATUS_CLIENT_TYPE,
-    credStatusClientAccessToken: process.env.CRED_STATUS_CLIENT_ACCESS_TOKEN, 
+    credStatusService: process.env.CRED_STATUS_SERVICE,
     credStatusRepoName: process.env.CRED_STATUS_REPO_NAME, 
     credStatusMetaRepoName: process.env.CRED_STATUS_META_REPO_NAME, 
     credStatusRepoOrgName: process.env.CRED_STATUS_REPO_ORG_NAME, 
-    credStatusRepoVisibility: process.env.CRED_STATUS_REPO_VISIBILITY
+    credStatusRepoVisibility: process.env.CRED_STATUS_REPO_VISIBILITY,
+    credStatusAccessToken: process.env.CRED_STATUS_ACCESS_TOKEN,
+    credStatusDidSeed: process.env.CRED_STATUS_DID_SEED
   });
 }
 

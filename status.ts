@@ -2,28 +2,30 @@ import { createStatusManager } from '@digitalcredentials/status-list-manager-git
 import { getConfig } from './config';
 import { DidMethod } from './types';
 
-const { credStatusClientDidSeed,
-    credStatusClientType,
-    credStatusClientAccessToken,
+const {
+    credStatusService,
     credStatusRepoName,
     credStatusMetaRepoName,
     credStatusRepoOrgName,
-    credStatusRepoVisibility } = getConfig();
+    credStatusRepoVisibility,
+    credStatusAccessToken,
+    credStatusDidSeed
+} = getConfig();
 
 let STATUS_LIST_MANAGER = null;
 
 // creates or retrieves status list manager
-export async function getStatusListManager() {
+export async function getStatusManager() {
     if (!STATUS_LIST_MANAGER) {
       STATUS_LIST_MANAGER = await createStatusManager({
-          service: credStatusClientType,
+          service: credStatusService,
           repoName: credStatusRepoName,
           metaRepoName: credStatusMetaRepoName,
           repoOrgName: credStatusRepoOrgName,
           repoVisibility: credStatusRepoVisibility,
-          accessToken: credStatusClientAccessToken,
+          accessToken: credStatusAccessToken,
           didMethod: DidMethod.Key,
-          didSeed: credStatusClientDidSeed,
+          didSeed: credStatusDidSeed,
           signUserCredential: false,
           signStatusCredential: true
       });

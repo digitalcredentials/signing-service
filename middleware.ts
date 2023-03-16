@@ -1,9 +1,9 @@
-import { getStatusListManager } from './status';
+import { getStatusManager } from './status';
 
 // retrieves status list manager
-export async function getCredentialStatusListManager(req, res, next) {
+export async function getCredentialStatusManager(req, res, next) {
     try {
-      req.statusManager = await getStatusListManager();
+      req.statusManager = await getStatusManager();
       next();
     } catch (error) {
       return res.send('Failed to retrieve credential status list manager');
@@ -21,7 +21,7 @@ function extractAccessToken(headers) {
     }
 }
 
-// verifies whether issuer client has access to status repo
+// verifies whether issuer has access to status repo
 export async function verifyStatusRepoAccess(req, res, next) {
     const { headers } = req;
     // verify that access token was included in request
@@ -29,7 +29,7 @@ export async function verifyStatusRepoAccess(req, res, next) {
     if (!accessToken) {
       return res.send('Failed to provide access token in request');
     }
-    // check if issuer client has access to status repo
+    // check if issuer has access to status repo
     const hasAccess = await req.statusManager.hasStatusAuthority(accessToken);
     if (!hasAccess) {
       return res.send('Issuer is unauthorized to access status repo');

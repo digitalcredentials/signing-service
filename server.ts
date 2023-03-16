@@ -3,11 +3,13 @@ import http from 'http';
 import fs from 'fs';
 import { build } from './app';
 import { getConfig, setConfig } from './config';
+import { getStatusManager } from './status';
 
 const run = async () => {
-  await setConfig()
+  await setConfig();
   const { port, enableHttpsForDev } = getConfig();
 
+  await getStatusManager();
   const app = await build();
   if (enableHttpsForDev) {
     https
@@ -21,12 +23,7 @@ const run = async () => {
   } else {
     http
       .createServer(app).listen(port, () => console.log(`Server running on port ${port}`))
-
   }
 };
 
 run();
-
-
-
-
