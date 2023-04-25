@@ -1,4 +1,4 @@
-name: move new, edited, reopened issues to DCC Enginnering backlog
+name: move new, edited, reopened issues to DCC Enginnering project
 
 on:
   issues:
