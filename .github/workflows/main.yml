@@ -1,14 +1,22 @@
-name: move new, edited, reopened issues to DCC Enginnering project
+name: Node.js CI
 
-on:
-  issues:
-    types: [ opened, edited, reopened ]
+on: [push]
+
 jobs:
-  add-to-project:
-    name: Add issue to project
+  test-node:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        node-version: [16.x]
     steps:
-      - uses: actions/add-to-project@main
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
         with:
-          project-url: https://github.com/orgs/digitalcredentials/projects/14
-          github-token: ${{ secrets.PROJECTS_ACCESS_TOKEN }}
+          node-version: ${{ matrix.node-version }}
+      - run: npm install
+      - name: Run test with Node.js ${{ matrix.node-version }}
+        run: npm run test
+        env:
+          CI: true
