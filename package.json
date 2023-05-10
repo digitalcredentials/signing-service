@@ -1,19 +1,21 @@
 {
-  "name": "@digitalcredentials/issuer",
+  "name": "issuer",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "scripts": {
     "start": "node -r dotenv/config server.js",
-    "dev": "nodemon -r dotenv/config server.js"
+    "dev": "nodemon -r dotenv/config server.js",
+    "test": "NODE_OPTIONS=--experimental-vm-modules npx mocha --timeout 10000 -r dotenv/config dotenv_config_path=src/test-fixtures/.env.testing src/app.test.js "
   },
   "dependencies": {
     "@digitalcredentials/bnid": "^2.1.2",
     "@digitalcredentials/cborld": "^4.3.4",
     "@digitalcredentials/ed25519-signature-2020": "^3.0.2",
     "@digitalcredentials/ed25519-verification-key-2020": "^4.0.0",
+    "@digitalcredentials/issuer-core": "github:digitalcredentials/issuer-core",
     "@digitalcredentials/security-document-loader": "^1.0.0",
-    "@digitalcredentials/status-list-manager-git": "github:digitalcredentials/status-list-manager-git#import-status-list-client-from-sign-and-verify",
+    "@digitalcredentials/status-list-manager-git": "github:digitalcredentials/status-list-manager-git",
     "@digitalcredentials/vc": "^5.0.0",
     "base32-encode": "^2.0.0",
     "cookie-parser": "~1.4.4",
@@ -21,10 +23,13 @@
     "debug": "~2.6.9",
     "dotenv": "^16.0.3",
     "express": "~4.16.1",
-    "morgan": "~1.9.1",
-    "qrcode": "^1.5.1"
+    "morgan": "~1.9.1"
   },
   "devDependencies": {
-    "nodemon": "^2.0.21"
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0",
+    "nock": "^13.3.1",
+    "nodemon": "^2.0.21",
+    "supertest": "^6.3.3"
   }
 }
