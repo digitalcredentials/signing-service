@@ -3,4 +3,4 @@ WORKDIR /app
 COPY . .
 RUN npm install
 CMD ["node", "server.js"]
-EXPOSE 4007
+EXPOSE 4006

@@ -1,11 +1,10 @@
 import { generateSecretKeySeed, decodeSecretKeySeed } from '@digitalcredentials/bnid';
 
 let CONFIG;
-const defaultPort = 4007
-const defaultTestSeed = "z1AeiPT496wWmo9BG2QYXeTusgFSZPNG3T9wNeTtjrQ3rCB"
-const defaultTestTenantName = "test"
+const defaultPort = 4006
+const testSeed = "z1AeiPT496wWmo9BG2QYXeTusgFSZPNG3T9wNeTtjrQ3rCB"
+const testTenantName = "test"
 const DID_SEEDS = {};
-const TENANT_ACCESS_TOKENS = {}
 
 export function setConfig() {
   CONFIG = parseConfig();
@@ -24,34 +23,14 @@ async function parseTenantSeeds() {
     DID_SEEDS[tenantName] = await decodeSeed(value)
   }
   // add in the default test key
-  DID_SEEDS[defaultTestTenantName] = await decodeSeed(defaultTestSeed)
-
-
-}
-
-function parseTenantTokens() {
-  const allEnvVars = process.env;
-  const tenantKeys = Object.getOwnPropertyNames(allEnvVars)
-    .filter(key => key.toUpperCase().startsWith('TENANT_TOKEN_')) 
-  for(const key of tenantKeys) {
-    let value = allEnvVars[key]
-    const tenantName = key.slice(13).toLowerCase()
-    TENANT_ACCESS_TOKENS[tenantName] = value
-  }
-
+  DID_SEEDS[testTenantName] = await decodeSeed(testSeed)
 }
 
 function parseConfig() {
   const env = process.env
   const config = Object.freeze({
     enableHttpsForDev: env.ENABLE_HTTPS_FOR_DEV?.toLowerCase() === 'true',
-    enableStatusAllocation: env.ENABLE_STATUS_ALLOCATION?.toLowerCase() === 'true' ,
     port: env.PORT ? parseInt(env.PORT) : defaultPort,
-    credStatusDidSeed: env.CRED_STATUS_DID_SEED,
-    credStatusAccessToken: env.CRED_STATUS_ACCESS_TOKEN, 
-    credStatusRepoName: env.CRED_STATUS_REPO_NAME, 
-    credStatusMetaRepoName: env.CRED_STATUS_META_REPO_NAME, 
-    credStatusRepoOrgName: env.CRED_STATUS_REPO_OWNER
   });
   return config
 }
@@ -78,16 +57,6 @@ export async function getTenantSeed(tenantName) {
   }
 }
 
-export function getTenantToken(tenantName) {
-  if (! Object.keys(TENANT_ACCESS_TOKENS).length) {
-     parseTenantTokens()
-  }
-  if (TENANT_ACCESS_TOKENS.hasOwnProperty(tenantName)) {
-    return TENANT_ACCESS_TOKENS[tenantName];
-  } else {
-    return null
-  }
-}
 
 const decodeSeed = async (secretKeySeed) => {
     let secretKeySeedBytes // Uint8Array;
