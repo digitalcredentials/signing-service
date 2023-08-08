@@ -4,6 +4,7 @@ let CONFIG;
 const defaultPort = 4006
 const testSeed = "z1AeiPT496wWmo9BG2QYXeTusgFSZPNG3T9wNeTtjrQ3rCB"
 const testTenantName = "test"
+const randomTenantName = "random"
 const DID_SEEDS = {};
 
 export function setConfig() {
@@ -11,6 +12,11 @@ export function setConfig() {
 }
 
 async function parseTenantSeeds() {
+  // add in the default test key now, so it can be overridden by env
+  DID_SEEDS[testTenantName] = await decodeSeed(testSeed)
+  // also add in the random test key
+  const randomSeed = await generateSecretKeySeed();
+  DID_SEEDS[randomTenantName] = await decodeSeed(randomSeed)
   const allEnvVars = process.env;
   const didSeedKeys = Object.getOwnPropertyNames(allEnvVars)
     .filter(key => key.toUpperCase().startsWith('TENANT_SEED_')) 
@@ -22,8 +28,7 @@ async function parseTenantSeeds() {
     const tenantName = key.slice(12).toLowerCase()
     DID_SEEDS[tenantName] = await decodeSeed(value)
   }
-  // add in the default test key
-  DID_SEEDS[testTenantName] = await decodeSeed(testSeed)
+  
 }
 
 function parseConfig() {
