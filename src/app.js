@@ -14,7 +14,6 @@ export async function build(opts = {}) {
     app.use(cors())
 
     app.get('/', function (req, res, next) {
-
         res.send({ message: 'signing-service server status: ok.' })
     });
 
@@ -34,8 +33,7 @@ export async function build(opts = {}) {
 
     app.get('/seedgen', async (req, res, next) => {
         const newSeed = await generateSeed()
-        console.log(newSeed)
-        res.send(newSeed)
+        res.json(newSeed)
     });
 
     return app;
