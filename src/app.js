@@ -27,7 +27,8 @@ export async function build(opts = {}) {
                 return res.json(signedVC)
             } catch (error) {
                 console.log(error);
-                return res.status(403).json(error);
+                const errorCode = error.code || 403
+                return res.status(errorCode).json(error);
             }
         })
 
