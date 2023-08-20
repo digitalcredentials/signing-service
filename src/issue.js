@@ -4,6 +4,10 @@ import { securityLoader } from '@digitalcredentials/security-document-loader';
 import { IssuerInstance } from '@digitalcredentials/issuer-core'
 import { getTenantSeed } from "./config.js";
 
+function SigningException(code, message) {
+    this.code = code
+    this.message = message
+}
 const ISSUER_INSTANCES = {};
 const documentLoader = securityLoader().build()
 
@@ -20,6 +24,7 @@ const buildIssuerInstance = async (seed) => {
 const getIssuerInstance = async (instanceId) => {
     if (!ISSUER_INSTANCES[instanceId]) {
         const didSeed = await getTenantSeed(instanceId)
+        if (!didSeed) throw new SigningException(404, "Tenant doesn't exist.")
         ISSUER_INSTANCES[instanceId] = await buildIssuerInstance(didSeed)
     }
     return ISSUER_INSTANCES[instanceId]
