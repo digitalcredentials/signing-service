@@ -14,7 +14,7 @@
     "@digitalcredentials/ed25519-signature-2020": "^3.0.2",
     "@digitalcredentials/ed25519-verification-key-2020": "^4.0.0",
     "@digitalcredentials/issuer-core": "github:digitalcredentials/issuer-core",
-    "@digitalcredentials/security-document-loader": "^1.0.0",
+    "@digitalcredentials/security-document-loader": "^3.1.0",
     "@digitalcredentials/status-list-manager-git": "github:digitalcredentials/status-list-manager-git",
     "@digitalcredentials/vc": "^5.0.0",
     "base32-encode": "^2.0.0",
