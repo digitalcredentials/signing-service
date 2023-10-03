@@ -74,7 +74,7 @@ describe('api', () => {
     it('returns 400 if no body', done => {
       request(app)
         .post("/instance/testing/credentials/sign")
-        .expect('Content-Type', /text/)
+        .expect('Content-Type', /json/)
         .expect(400, done)
     })
 

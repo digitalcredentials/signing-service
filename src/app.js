@@ -22,13 +22,14 @@ export async function build(opts = {}) {
             try {
                 const instanceId = req.params.instanceId //the issuer instance/tenant with which to sign
                 const unSignedVC = req.body;
-                if (!req.body || !Object.keys(req.body).length) return res.status(400).send('A verifiable credential must be provided in the body')
+                if (!req.body || !Object.keys(req.body).length) return res.status(400).send({message: 'A verifiable credential must be provided in the body', code: 400})
                 const signedVC = await issue(unSignedVC, instanceId)
                 return res.json(signedVC)
             } catch (error) {
                 console.log(error);
-                const errorCode = error.code || 403
-                return res.status(errorCode).json(error);
+                const code = error.code || 403
+                const message = `The signing service threw an error: ${error.message || error}`
+                return res.status(code).json({message, code});
             }
         })
 
