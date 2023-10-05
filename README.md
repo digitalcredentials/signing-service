@@ -16,6 +16,7 @@
 - [Usage](#usage)
   - [Sign a credential](#sign-a-credential)
   - [Learner Credential Wallet](#learner-credential-wallet)
+- [Versioning](#versioning)
 - [Development](#development)
   - [Testing](#testing)
 - [Contribute](#contribute)
@@ -299,6 +300,20 @@ You might now consider importing your new credential into the [Learner Credentia
 ## Revocation
 
 The signing-service doesn't on its own provide a revocation mechanism. To enable revocation, you'll want to combine the signing-service with a revocation system like the [DCC status-service](https://github.com/digitalcredentials/status-service), but we've already done exactly that with the [DCC issuer-coordinator](https://github.com/digitalcredentials/issuer-coordinator)
+
+## Versioning
+
+The signing-service is primarily intended to run as a docker image within a docker compose network, typically as part of a flow that is orchestrated by the [DCC Issuer Coordinator](https://github.com/digitalcredentials/issuer-coordinator) and the [DCC Workflow Coordinator](https://github.com/digitalcredentials/workflow-coordinator). 
+
+For convenience we've published the images for the signing-service and the other services used by the coordinators, as well as for the coordinators themselves, to Docker Hub so that you don't have to build them locally yourself from the github repositories.
+
+The images on Docker Hub will of course at times be updated to add new functionality and fix bugs. Rather than overwrite the default (`latest`) version on Docker Hub for each update, we've adopted the [Semantic Versioning Guidelines](https://semver.org) with our docker image tags.
+
+We DO NOT provide a `latest` tag so you must provide a tag name (i.e, the version number) for the images in your docker compose file.
+
+To ensure you've got compatible versions of the services and the coordinator, the `major` number for each should match. At the time of writing, the versions for each are at 0.1.0, and the `major` number (the leftmost number) agrees across all three.
+
+If you do ever want to work from the source code in the repository and build your own images, we've tagged the commits in Github that were used to build the corresponding Docker image. So a github tag of v0.1.0 coresponds to a docker image tag of 0.1.0
 
 ## Development
 
