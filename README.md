@@ -30,15 +30,15 @@ Implements two http endpoints:
 
  * POST /instance/:instanceId/credentials/sign
 
-Which signs and returns a verifiable credential that has been posted to it.
+Which signs and returns a [Verifiable Credential](https://www.w3.org/TR/vc-data-model/) that has been posted to it.
    
  * GET /seedgen
 
-Which is a convenience method for generating a new signing key.
+Which is a convenience method for generating a new signing key, encoded as a [Decentralized Identifier (DID)](https://www.w3.org/TR/did-core/)
   
-The service is meant to be called as a RESTful service from any software wanting to sign a credential, and in particular is so used by the [DCC issuer-coordinator](https://github.com/digitalcredentials/issuer-coordinator) and the  [DCC workflow-coordinator](https://github.com/digitalcredentials/worfklow-coordinator) from within a Docker Compose network.
+The signing endpoint is meant to be called as a RESTful service from any software wanting to sign a credential, and in particular is so used by the [DCC issuer-coordinator](https://github.com/digitalcredentials/issuer-coordinator) and the  [DCC workflow-coordinator](https://github.com/digitalcredentials/worfklow-coordinator) from within a Docker Compose network.
 
-The service supports multiple signing keys, identified by the `:instanceId` in the endpoint path. An `instance` is analagous to a `tenant`.
+This service supports multiple signing keys ([DIDs](https://www.w3.org/TR/did-core/)), identified by the `:instanceId` in the signing endpoint's path. An `instance` is analagous to a `tenant`.
 
 You may also want to take a look at the [DCC issuer-coordinator](https://github.com/digitalcredentials/issuer-coordinator), as it provides bearer token security over tenant endpoints, and combines both signing and status revocation as a single service. It also describes a model for composing DCC services within a Docker Compose network.
 
@@ -72,9 +72,9 @@ There is a sample .env file provided called .env.example to help you get started
 
 ### Tenants
 
-You might want to allow more than one signing key/DID to be used with the issuer. For example, you might want to sign university/college degree diplomas with a DID that is only used by the registrar, but then also allow certificates for individual courses to be signed by by different DIDS that are owned by the faculty or department that teaches the course.
+You might want to allow more than one signing key ([DID](https://www.w3.org/TR/did-core/)) to be used with the issuer. For example, you might want to sign university/college degree diplomas with a key ([DID](https://www.w3.org/TR/did-core/)) that is only used by the registrar, but then also allow certificates for individual courses to be signed by by different keys ([DIDs](https://www.w3.org/TR/did-core/)) that are owned by the faculty or department that teaches the course.
 
-We're calling these differents signing authorities 'tenants'.  You can set up as many tenants as you like by including a `TENANT_SEED_{TENANT_NAME}={seed}` environment variable for every 'tenant'.
+We're calling these differents signing authorities 'tenants' (or 'instances').  You can set up as many tenants as you like by including a `TENANT_SEED_{TENANT_NAME}={seed}` environment variable for every 'tenant'.
 
 NOTE: the `seed` is explained below in the [Signing key section](#signing-key).
 
@@ -92,23 +92,41 @@ http://myhost.org/instance/degrees/credentials/issue
 http://myhost.org/instance/econ101/credentials/issue
 ```
 
-Note that these are unsecured calls. You can choose to implement security as best suits your needs. For one example, take a look at the [DCC Issuer Coordinator](https://github.com/digitalcredentials/issuer-coordinator) which uses a bearer token.
+Note that these are all unsecured calls. You can choose to implement security as best suits your needs. For one example of a bearer token approach, take a look at the [DCC Issuer Coordinator](https://github.com/digitalcredentials/issuer-coordinator).
 
-Read on to generate your seeds...
+#### Default Tenants
+
+There are two tenants setup by default:
+
+ * instance/test/credentials/issue
+ * instance/random/credentials/issue
+
+The `test` tenant uses this seed and corresponding [DID](https://www.w3.org/TR/did-core/):
+
+ * seed - `z1AeiPT496wWmo9BG2QYXeTusgFSZPNG3T9wNeTtjrQ3rCB`
+ * did - `did:key:z6MknNQD1WHLGGraFi6zcbGevuAgkVfdyCdtZnQTGWVVvR5Q`
+
+That [DID](https://www.w3.org/TR/did-core/) for the `test` tenant is currently registered in the [DCC Sandbox Registry](https://github.com/digitalcredentials/sandbox-registry) so that any credentials generated with that tenant will, when verified, show as having originated from the DCC test issuer.
+
+See the [Sign a credential](#sign-a-credential) section for a working CURL example of how to sign with the `test` tenant.
+
+The `random` tenant generates a random signing key every time the server is started. This is strictly meant for testing and experimenting. For production use, you must generate your own signing keys.
+
+Read on to generate your signing keys...
 
 ### Signing key
 
 The issuer is by default configured with a signing key that can only be used for testing and evaluation.
 
-To issue your own credentials you must generate your own signing key and keep it private.  We've tried to make that a little easier, and provide a convenience endpoint in the issuer that you can use to generate a brand new key.  You can hit the endpoint with the following CURL command:
+To issue your own credentials you must generate your own signing key and keep it private.  We've tried to make that a little easier by providing a convenience endpoint in the issuer that you can use to generate a brand new key.  You can hit the endpoint with the following CURL command:
 
 `curl --location 'http://localhost:4006/seedgen'`
 
 This will return a json document with:
 
 - a seed
-- the corresponding DID
-- the corresponding DID Document
+- the corresponding [DID](https://www.w3.org/TR/did-core/)
+- the corresponding [DID](https://www.w3.org/TR/did-core/) Document
 
 The returned result will look something like this:
 
@@ -139,7 +157,7 @@ The returned result will look something like this:
 }
 ```
 
-The two important properties there are the `seed` and the `did`.
+The two important properties for our purposes are the `seed` and the `did`.
 
 Copy the `seed` value and add it as described in the [Tenant](#tenants) section above, basically like so:
 
@@ -151,17 +169,19 @@ For example,
 
 The signing-service uses the seed to deterministically generate the signing key.
 
-The did:key is meant to be shared with others, typically by publishing it in a public registry for use by verifiers.  So about registries... 
+NOTE: there is also an option to set the seed value for a tenant to `generate`. The system will generate a random signing key for any tenants so configured. This is really only useful for testing and experimenting since the keys are lost on restart, and the associated [DID](https://www.w3.org/TR/did-core/) for each is not registered in any public registry.
+
+The `did` value is meant to be shared with others, typically by publishing it in a public registry for use by verifiers.  So about registries... 
 
 ### DID Registries
 
-So that a verifier knows that a credential was signed by a key that is really owned by the claimed issuer, the key (encoded as a DID) has to be confirmed as really belonging to that issuer.  This is typically done by adding the DID to a well known registry that the verifier checks when verifying a credential.
+So that a verifier knows that a credential was signed by a key that is really owned by the claimed issuer, the key (encoded as a [DID](https://www.w3.org/TR/did-core/)) has to be confirmed as really belonging to that issuer.  This is typically done by adding the DID to a well known registry that the verifier checks when verifying a credential.
 
-The DCC provides a number of registries that work with the verifiers in the Learner Credential Wallet and in the online web based [Verifier Plus](https://verifierplus.org).  The DCC registries use Github for storage.  To request that your DID be added to a registry, submit a pull request in which you've added your [DID](https://www.w3.org/TR/did-core/) to the registry file.
+The DCC provides a number of registries that work with the verifiers in the Learner Credential Wallet and in the online web based [Verifier Plus](https://verifierplus.org).  The DCC registries use Github for storage.  To request that your [DID](https://www.w3.org/TR/did-core/) be added to a registry, submit a pull request in which you've added your [DID](https://www.w3.org/TR/did-core/) to the registry file.
 
 ### did:key
 
-For the moment, the issuer is set up to use the did:key implemenation of a DID which is one of the simpler implementations and doesn't require that the DID document be hosted anywhere.
+For the moment, the issuer is set up to use the did:key implemenation of a [DID](https://www.w3.org/TR/did-core/) which is one of the simpler implementations and doesn't require that the [DID](https://www.w3.org/TR/did-core/) document be hosted anywhere.
 
 ### did:web
 
@@ -315,7 +335,7 @@ You might now consider importing your new credential into the [Learner Credentia
 
 ## Revocation
 
-The signing-service doesn't on its own provide a revocation mechanism. To enable revocation, you'll want to combine the signing-service with a revocation system like the [DCC status-service](https://github.com/digitalcredentials/status-service), but we've already done exactly that with the [DCC issuer-coordinator](https://github.com/digitalcredentials/issuer-coordinator)
+The signing-service doesn't on its own provide a revocation mechanism. To enable revocation, you'll want to combine the signing-service with a revocation system like the [DCC status-service](https://github.com/digitalcredentials/status-service), but we've already done exactly that with the [DCC issuer-coordinator](https://github.com/digitalcredentials/issuer-coordinator).
 
 ## Versioning
 
