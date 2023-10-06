@@ -26,11 +26,19 @@
 
 Use this express server to sign [Verifiable Credentials](https://www.w3.org/TR/vc-data-model/).
 
-Implements one http endpoint:
+Implements two http endpoints:
 
- * [POST /instance/:instanceId/credentials/sign]
+ * POST /instance/:instanceId/credentials/sign
 
-The service is meant to be called as a RESTful service from any software wanting to sign a credential, and in particular is thusly used by the [DCC issuer-coordinator](https://github.com/digitalcredentials/issuer-coordinator) and the  [DCC workflow-coordinator](https://github.com/digitalcredentials/worfklow-coordinator) from within a Docker Compose network.
+Which signs and returns a verifiable credential that has been posted to it.
+   
+ * GET /seedgen
+
+Which is a convenience method for generating a new signing key.
+  
+The service is meant to be called as a RESTful service from any software wanting to sign a credential, and in particular is so used by the [DCC issuer-coordinator](https://github.com/digitalcredentials/issuer-coordinator) and the  [DCC workflow-coordinator](https://github.com/digitalcredentials/worfklow-coordinator) from within a Docker Compose network.
+
+The service supports multiple signing keys, identified by the `:instanceId` in the endpoint path. An `instance` is analagous to a `tenant`.
 
 You may also want to take a look at the [DCC issuer-coordinator](https://github.com/digitalcredentials/issuer-coordinator), as it provides bearer token security over tenant endpoints, and combines both signing and status revocation as a single service. It also describes a model for composing DCC services within a Docker Compose network.
 
@@ -48,7 +56,7 @@ docker run -dp 4006:4006 digitalcredentials/signing-service:0.1.0
 
 You can now issue test credentials as explained in the [Sign a Credential](#sign-a-credential) section.
 
-IMPORTANT: this quick start version uses a test signing key that is not registered by an actual issuer. To use this in production you'll have to generate your own signing key, and register it publicly. To do so, read on...
+IMPORTANT: this quick start version uses a test signing key that is not registered as belonging to an actual issuer. To use this in production you'll have to generate your own signing key, and register it publicly. To do so, read on...
 
 ## Configuration
 
@@ -66,7 +74,9 @@ There is a sample .env file provided called .env.example to help you get started
 
 You might want to allow more than one signing key/DID to be used with the issuer. For example, you might want to sign university/college degree diplomas with a DID that is only used by the registrar, but then also allow certificates for individual courses to be signed by by different DIDS that are owned by the faculty or department that teaches the course.
 
-We're calling these differents signing authorities 'tenants'.  You can set up as many tenants as you like by including a `TENANT_SEED_{TENANT_NAME}` environment variable for every 'tenant'.
+We're calling these differents signing authorities 'tenants'.  You can set up as many tenants as you like by including a `TENANT_SEED_{TENANT_NAME}={seed}` environment variable for every 'tenant'.
+
+NOTE: the `seed` is explained below in the [Signing key section](#signing-key).
 
 So, if you wanted to set up two tenants, one for degrees and one for completion of the Econ101 course then you could create the tenants by setting the following in the .env file:
 
@@ -82,7 +92,9 @@ http://myhost.org/instance/degrees/credentials/issue
 http://myhost.org/instance/econ101/credentials/issue
 ```
 
-Note that these are unsecured calls. You can choose to implement security as best suits your needs. For one example, take a look at the [DCC Issuer Coordinator]([http://github.com/](https://github.com/digitalcredentials/issuer-coordinator) which uses a bearer token.
+Note that these are unsecured calls. You can choose to implement security as best suits your needs. For one example, take a look at the [DCC Issuer Coordinator](https://github.com/digitalcredentials/issuer-coordinator) which uses a bearer token.
+
+Read on to generate your seeds...
 
 ### Signing key
 
@@ -137,6 +149,8 @@ For example,
 
 `TENANT_SEED_CHEMISTRY101=z1AjQUBZCNoiyPUC8zbbF29gLdZtHRqT6yPdFGtqJa5VfQ6`
 
+The signing-service uses the seed to deterministically generate the signing key.
+
 The did:key is meant to be shared with others, typically by publishing it in a public registry for use by verifiers.  So about registries... 
 
 ### DID Registries
@@ -167,9 +181,11 @@ You can directly from the DockerHub image, using a default configuration, with:
 
   `docker run -dp 4006:4006 digitalcredentials/signing-service:0.1.0`
 
-  or by passing in a reference to your .env file, to set your own configuration:
+To run it with your own configuration (like with your own signing keys):
 
 ``docker run --env-file .env -dp 4006:4006 digitalcredentials/signing-service:0.1.0`
+
+where the `.env` file contains your environment variables. See [.env.example](./.env.example).
 
 #### With Docker Compose
 
