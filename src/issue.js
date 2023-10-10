@@ -3,11 +3,9 @@ import { driver } from '@digitalcredentials/did-method-key';
 import { securityLoader } from '@digitalcredentials/security-document-loader';
 import { IssuerInstance } from '@digitalcredentials/issuer-core'
 import { getTenantSeed } from "./config.js";
+import SigningException from './SigningException.js';
 
-function SigningException(code, message) {
-    this.code = code
-    this.message = message
-}
+
 const ISSUER_INSTANCES = {};
 const documentLoader = securityLoader().build()
 

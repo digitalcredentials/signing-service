@@ -35,6 +35,11 @@ function parseConfig() {
   const env = process.env
   const config = Object.freeze({
     enableHttpsForDev: env.ENABLE_HTTPS_FOR_DEV?.toLowerCase() === 'true',
+    enableAccessLogging: env.ENABLE_ACCESS_LOGGING?.toLowerCase() === 'true',
+    logToConsole: env.LOG_TO_CONSOLE?.toLowerCase() === 'true',
+    httpAccessLogFile: env.HTTP_ACCESS_LOG_FILE,
+    errorLogFile: env.ERROR_LOG_FILE,
+    logAllFile: env.LOG_ALL_FILE,
     port: env.PORT ? parseInt(env.PORT) : defaultPort,
   });
   return config
@@ -75,3 +80,46 @@ const decodeSeed = async (secretKeySeed) => {
     }
     return secretKeySeedBytes;
 }
+
+
+/*
+
+DID doc for tenant test with seed z1AeiPT496wWmo9BG2QYXeTusgFSZPNG3T9wNeTtjrQ3rCB
+{
+  '@context': [
+    'https://www.w3.org/ns/did/v1',
+    'https://w3id.org/security/suites/ed25519-2020/v1',
+    'https://w3id.org/security/suites/x25519-2020/v1'
+  ],
+  id: 'did:key:z6MknNQD1WHLGGraFi6zcbGevuAgkVfdyCdtZnQTGWVVvR5Q',
+  verificationMethod: [
+    {
+      id: 'did:key:z6MknNQD1WHLGGraFi6zcbGevuAgkVfdyCdtZnQTGWVVvR5Q#z6MknNQD1WHLGGraFi6zcbGevuAgkVfdyCdtZnQTGWVVvR5Q',
+      type: 'Ed25519VerificationKey2020',
+      controller: 'did:key:z6MknNQD1WHLGGraFi6zcbGevuAgkVfdyCdtZnQTGWVVvR5Q',
+      publicKeyMultibase: 'z6MknNQD1WHLGGraFi6zcbGevuAgkVfdyCdtZnQTGWVVvR5Q'
+    }
+  ],
+  authentication: [
+    'did:key:z6MknNQD1WHLGGraFi6zcbGevuAgkVfdyCdtZnQTGWVVvR5Q#z6MknNQD1WHLGGraFi6zcbGevuAgkVfdyCdtZnQTGWVVvR5Q'
+  ],
+  assertionMethod: [
+    'did:key:z6MknNQD1WHLGGraFi6zcbGevuAgkVfdyCdtZnQTGWVVvR5Q#z6MknNQD1WHLGGraFi6zcbGevuAgkVfdyCdtZnQTGWVVvR5Q'
+  ],
+  capabilityDelegation: [
+    'did:key:z6MknNQD1WHLGGraFi6zcbGevuAgkVfdyCdtZnQTGWVVvR5Q#z6MknNQD1WHLGGraFi6zcbGevuAgkVfdyCdtZnQTGWVVvR5Q'
+  ],
+  capabilityInvocation: [
+    'did:key:z6MknNQD1WHLGGraFi6zcbGevuAgkVfdyCdtZnQTGWVVvR5Q#z6MknNQD1WHLGGraFi6zcbGevuAgkVfdyCdtZnQTGWVVvR5Q'
+  ],
+  keyAgreement: [
+    {
+      id: 'did:key:z6MknNQD1WHLGGraFi6zcbGevuAgkVfdyCdtZnQTGWVVvR5Q#z6LStW7uovRREdrMqg33zVSU64GRsWhz2U9U3JHAdGtHYxz3',
+      type: 'X25519KeyAgreementKey2020',
+      controller: 'did:key:z6MknNQD1WHLGGraFi6zcbGevuAgkVfdyCdtZnQTGWVVvR5Q',
+      publicKeyMultibase: 'z6LStW7uovRREdrMqg33zVSU64GRsWhz2U9U3JHAdGtHYxz3'
+    }
+  ]
+}
+
+*/
