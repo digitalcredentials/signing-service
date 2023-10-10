@@ -79,13 +79,14 @@ describe('api', () => {
     })
 
 
-    it('returns 404 if no seed for tenant name', done => {
+    it('returns 404 if no seed for tenant name', async () => {
       const unSignedVC = getUnsignedVC();
-      request(app)
+      const response = await request(app)
         .post("/instance/wrongTenantName/credentials/sign")
         .send(unSignedVC)
-        .expect(404, done)
-        .expect('Content-Type', /json/)
+
+      expect(response.header["content-type"]).to.have.string("json");
+      expect(response.status).to.eql(404);
 
     })
 
