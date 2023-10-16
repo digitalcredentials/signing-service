@@ -35,6 +35,8 @@ export async function build(opts = {}) {
                 return res.json(signedVC)
              } catch (e) {
                 // we have to catch the async errors and pass them to the error handler
+                // note here that if e contains a code property, the spread of e will
+                // (deliberately) overwrite the 403
                 next({code: 403, ...e})
             } 
         })
