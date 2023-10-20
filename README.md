@@ -17,6 +17,7 @@
   - [Sign a credential](#sign-a-credential)
   - [Learner Credential Wallet](#learner-credential-wallet)
 - [Versioning](#versioning)
+- [Logging](#logging)
 - [Development](#development)
   - [Testing](#testing)
 - [Contribute](#contribute)
@@ -69,6 +70,10 @@ There is a sample .env file provided called .env.example to help you get started
 | `PORT` | http port on which to run the express app | 4006 | no |
 | `ENABLE_HTTPS_FOR_DEV` | runs the dev server over https - ONLY FOR DEV - typically to allow CORS calls from a browser | false | no |
 | `TENANT_SEED_{TENANT_NAME}` | see [tenants](#tenants) section for instructions | no | no |
+| `ERROR_LOG_FILE` | log file for all errors - see [Logging](#logging) | no | no |
+| `LOG_ALL_FILE` | log file for everything - see [Logging](#logging) | no | no |
+| `CONSOLE_LOG_LEVEL` | console log level - see [Logging](#logging) | silly | no |
+| `LOG_LEVEL` | log level for application - see [Logging](#logging) | silly | no |
 
 ### Tenants
 
@@ -350,6 +355,52 @@ We DO NOT provide a `latest` tag so you must provide a tag name (i.e, the versio
 To ensure you've got compatible versions of the services and the coordinator, the `major` number for each should match. At the time of writing, the versions for each are at 0.1.0, and the `major` number (the leftmost number) agrees across all three.
 
 If you do ever want to work from the source code in the repository and build your own images, we've tagged the commits in Github that were used to build the corresponding Docker image. So a github tag of v0.1.0 coresponds to a docker image tag of 0.1.0
+
+## Logging
+
+We support the following log levels:
+
+```
+  error: 0,
+  warn: 1,
+  info: 2,
+  http: 3,
+  verbose: 4,
+  debug: 5,
+  silly: 6
+```
+
+Logging is configured with environment variables, as defined in the [Environment Variables](#environment-variables) section.
+
+By default, everything is logged to the console (log level `silly`).
+
+You may set the log level for the application as whole, e.g.,
+
+```LOG_LEVEL=http```
+
+Which would only log messages with severity 'http' and all below it (info, warn, error). 
+
+The default is to log everything (level 'silly').
+
+You can also set the log level for console logging, e.g.,
+
+```CONSOLE_LOG_LEVEL=debug```
+
+This would log everything for severity 'debug' and lower (i.e., verbose, http, info, warn, error). This of course assumes that you've set the log level for the application as a whole to at least the same level.
+
+The default log level for the console is 'silly', which logs everything.
+
+There are also two log files that can be enabled:
+
+* errors (only logs errors)
+* all (logs everything - all log levels)
+
+Enable each log by setting an env variable for each, indicating the path to the appropriate file, like this example:
+
+```
+LOG_ALL_FILE=logs/all.log
+ERROR_LOG_FILE=logs/error.log
+```
 
 ## Development
 
