@@ -2,6 +2,8 @@ import { generateSecretKeySeed, decodeSecretKeySeed } from '@digitalcredentials/
 
 let CONFIG;
 const defaultPort = 4006
+const defaultConsoleLogLevel = 'silly'
+const defaultLogLevel = 'silly'
 const testSeed = "z1AeiPT496wWmo9BG2QYXeTusgFSZPNG3T9wNeTtjrQ3rCB"
 const testTenantName = "test"
 const randomTenantName = "random"
@@ -35,9 +37,8 @@ function parseConfig() {
   const env = process.env
   const config = Object.freeze({
     enableHttpsForDev: env.ENABLE_HTTPS_FOR_DEV?.toLowerCase() === 'true',
-    enableAccessLogging: env.ENABLE_ACCESS_LOGGING?.toLowerCase() === 'true',
-    logToConsole: env.LOG_TO_CONSOLE?.toLowerCase() === 'true',
-    httpAccessLogFile: env.HTTP_ACCESS_LOG_FILE,
+    consoleLogLevel: env.CONSOLE_LOG_LEVEL?.toLocaleLowerCase() || defaultConsoleLogLevel,
+    logLevel: env.LOG_LEVEL?.toLocaleLowerCase() || defaultLogLevel,
     errorLogFile: env.ERROR_LOG_FILE,
     logAllFile: env.LOG_ALL_FILE,
     port: env.PORT ? parseInt(env.PORT) : defaultPort,

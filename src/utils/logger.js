@@ -1,7 +1,7 @@
 import winston from 'winston';
 import { getConfig } from '../config.js'
 
-const { errorLogFile, httpAccessLogFile, logAllFile, logToConsole  } = getConfig()
+const { errorLogFile, logAllFile, logLevel, consoleLogLevel } = getConfig()
 /* 
 These are the default npm logging levels
 that Winston uses, but we include them explicitly
@@ -17,20 +17,23 @@ const levels = {
   silly: 6
 }
 
-// set severity based on NODE_ENV
-// development: debug, i.e, log everything
+// Set severity using LOG_LEVEL from env.
+// If LOG_LEVEL is not set then set
+// it using NODE_ENV from env, where: 
+// development: silly, i.e, log everything
 // production: warn and error
 const level = () => {
-  const env = process.env.NODE_ENV || 'development'
-  const isDevelopment = env === 'development'
-  return isDevelopment ? 'debug' : 'warn'
+  if (logLevel) {
+    return logLevel
+  } else {
+    const env = process.env.NODE_ENV || 'development'
+    const isDevelopment = env === 'development'
+    return isDevelopment ? 'silly' : 'warn'
+  }
 }
 
 const format = winston.format.combine(
-
-  // add a timestamp
   winston.format.timestamp(),
-  // format all as json
   winston.format.json()
 )
 
@@ -39,19 +42,14 @@ Here we output as defined in the env
 */
 const transports = []
 
-  if (logToConsole) { transports.push(new winston.transports.Console())}
+  if (consoleLogLevel.toLowerCase() !== 'none') { transports.push(new winston.transports.Console({
+    level: consoleLogLevel
+  }))}
   
   if (errorLogFile) { 
     transports.push(new winston.transports.File({
       filename: errorLogFile,
       level: 'error',
-    }))
-  }
-
-  if (httpAccessLogFile) { 
-    transports.push(new winston.transports.File({
-      filename: httpAccessLogFile,
-      level: 'http',
     }))
   }
 
