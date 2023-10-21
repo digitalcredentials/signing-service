@@ -2,6 +2,8 @@
 
 [![Build status](https://img.shields.io/github/actions/workflow/status/digitalcredentials/signing-service/main.yml?branch=main)](https://github.com/digitalcredentials/signing-service/actions?query=workflow%3A%22Node.js+CI%22)
 
+IMPORTANT NOTE ABOUT VERSIONING: If you are using a Docker Hub image of this repository, make sure you are reading the version of this README that corresponds to your Docker Hub version.  If, for example, you are using the image `digitalcredentials/status-service:0.1.0` then you'll want to use the corresponding tagged repo: [https://github.com/digitalcredentials/status-service/tree/v0.1.0](https://github.com/digitalcredentials/status-service/tree/v0.1.0).
+
 ## Table of Contents
 
 - [Summary](#summary)
