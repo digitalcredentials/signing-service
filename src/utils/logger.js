@@ -1,4 +1,4 @@
-import winston from 'winston';
+import winston from 'winston'
 import { getConfig } from '../config.js'
 
 const { errorLogFile, logAllFile, logLevel, consoleLogLevel } = getConfig()
@@ -19,7 +19,7 @@ const levels = {
 
 // Set severity using LOG_LEVEL from env.
 // If LOG_LEVEL is not set then set
-// it using NODE_ENV from env, where: 
+// it using NODE_ENV from env, where:
 // development: silly, i.e, log everything
 // production: warn and error
 const level = () => {
@@ -42,28 +42,36 @@ Here we output as defined in the env
 */
 const transports = []
 
-  if (consoleLogLevel.toLowerCase() !== 'none') { transports.push(new winston.transports.Console({
-    level: consoleLogLevel
-  }))}
-  
-  if (errorLogFile) { 
-    transports.push(new winston.transports.File({
-      filename: errorLogFile,
-      level: 'error',
-    }))
-  }
+if (consoleLogLevel.toLowerCase() !== 'none') {
+  transports.push(
+    new winston.transports.Console({
+      level: consoleLogLevel
+    })
+  )
+}
 
-  if (logAllFile) {
-    transports.push(new winston.transports.File({ 
+if (errorLogFile) {
+  transports.push(
+    new winston.transports.File({
+      filename: errorLogFile,
+      level: 'error'
+    })
+  )
+}
+
+if (logAllFile) {
+  transports.push(
+    new winston.transports.File({
       filename: logAllFile
-    }))
-  }
+    })
+  )
+}
 
 const logger = winston.createLogger({
   level: level(),
   levels,
   format,
-  transports,
+  transports
 })
 
 export default logger
