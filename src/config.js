@@ -8,7 +8,7 @@ const defaultPort = 4006
 const defaultConsoleLogLevel = 'silly'
 const defaultLogLevel = 'silly'
 const testSeed = 'z1AeiPT496wWmo9BG2QYXeTusgFSZPNG3T9wNeTtjrQ3rCB'
-const testTenantName = 'test'
+const testTenantName = 'testing'
 const randomTenantName = 'random'
 const DID_SEEDS = {}
 
@@ -18,10 +18,13 @@ export function setConfig() {
 
 async function parseTenantSeeds() {
   // add in the default test key now, so it can be overridden by env
-  DID_SEEDS[testTenantName] = await decodeSeed(testSeed)
+  DID_SEEDS[testTenantName] = {
+    didSeed: await decodeSeed(testSeed),
+    didMethod: 'key'
+  }
   // also add in the random test key
-  const randomSeed = await generateSecretKeySeed()
-  DID_SEEDS[randomTenantName] = await decodeSeed(randomSeed)
+  const randomSeed = { didSeed: await generateSecretKeySeed() }
+  DID_SEEDS[randomTenantName] = await decodeSeed(randomSeed.didSeed)
   const allEnvVars = process.env
   const didSeedKeys = Object.getOwnPropertyNames(allEnvVars).filter((key) =>
     key.toUpperCase().startsWith('TENANT_SEED_')
@@ -31,8 +34,17 @@ async function parseTenantSeeds() {
     if (value === 'generate') {
       value = await generateSecretKeySeed()
     }
-    const tenantName = key.slice(12).toLowerCase()
-    DID_SEEDS[tenantName] = await decodeSeed(value)
+    const tenant = key.slice(12)
+    const tenantName = tenant.toLowerCase()
+    DID_SEEDS[tenantName] = {
+      didSeed: await decodeSeed(value),
+      didMethod:
+        process.env[`TENANT_DIDMETHOD_${tenant}`] &&
+        process.env[`TENANT_DIDMETHOD_${tenant}`].toLowerCase() === 'web'
+          ? 'web'
+          : 'key',
+      didUrl: process.env[`TENANT_DID_URL_${tenant}`]
+    }
   }
 }
 
