@@ -6,6 +6,7 @@ import accessLogger from './middleware/accessLogger.js'
 import errorHandler from './middleware/errorHandler.js'
 import errorLogger from './middleware/errorLogger.js'
 import invalidPathHandler from './middleware/invalidPathHandler.js'
+import SigningException from './SigningException.js'
 
 export async function build() {
   var app = express()
@@ -25,23 +26,26 @@ export async function build() {
       const instanceId = req.params.instanceId //the issuer instance/tenant with which to sign
       const unSignedVC = req.body
       if (!req.body || !Object.keys(req.body).length) {
-        next({
-          message: 'A verifiable credential must be provided in the body',
-          code: 400
-        })
+        throw new SigningException(
+          400,
+          'A verifiable credential must be provided in the body.'
+        )
       }
       const signedVC = await issue(unSignedVC, instanceId)
       return res.json(signedVC)
     } catch (e) {
-      // we have to catch the async errors and pass them to the error handler
-      const code = e.code || 500
-      next({ code, error: e.stack })
+      // catch the async errors and pass them to the error logger and handler
+      next(e)
     }
   })
 
-  app.get('/seedgen', async (req, res) => {
-    const newSeed = await generateSeed()
-    res.json(newSeed)
+  app.get('/seedgen', async (req, res, next) => {
+    try {
+      const newSeed = await generateSeed()
+      res.json(newSeed)
+    } catch (e) {
+      next(e)
+    }
   })
 
   // Attach the error handling middleware calls, in the order that they should run
