@@ -6,13 +6,13 @@ const errorHandler = (error, request, response, next) => {
   // and more easily understandable, referring to the logs
   // for more detail
 
-  const code = error.code | 500
+  const code = error.code || 500
   const message = `An error occurred in the signing-service: ${
     error.message || 'unknown error.'
-  } See the logs for full details. If you are using docker compose, view the logs with 'docker compose logs', and just the signing service logs with: 'docker compose logs signing-serive'`
+  } See the logs for full details. If you are using docker compose, view the logs with 'docker compose logs', and just the signing service logs with: 'docker compose logs signing-service'`
   const errorResponse = { code, message }
   response.header('Content-Type', 'application/json')
-  return response.status(error.code).json(errorResponse)
+  return response.status(code).json(errorResponse)
 }
 
 export default errorHandler
