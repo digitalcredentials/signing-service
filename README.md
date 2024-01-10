@@ -34,11 +34,11 @@ Implements two http endpoints:
  * POST /instance/:instanceId/credentials/sign
 
 Which signs and returns a [Verifiable Credential](https://www.w3.org/TR/vc-data-model/) that has been posted to it.
-   
+
  * GET /seedgen
 
 Which is a convenience method for generating a new signing key, encoded as a [Decentralized Identifier (DID)](https://www.w3.org/TR/did-core/)
-  
+
 The signing endpoint is meant to be called as a RESTful service from any software wanting to sign a credential, and in particular is so used by the [DCC issuer-coordinator](https://github.com/digitalcredentials/issuer-coordinator) and the  [DCC workflow-coordinator](https://github.com/digitalcredentials/worfklow-coordinator) from within a Docker Compose network.
 
 This service supports multiple signing keys ([DIDs](https://www.w3.org/TR/did-core/)), identified by the `:instanceId` in the signing endpoint's path. An `instance` is analagous to a `tenant`.
@@ -53,7 +53,7 @@ You can try this signing-service in about three minutes:
 
 2. From a terminal prompt, run:
 
-``` 
+```
 docker run -dp 4006:4006 digitalcredentials/signing-service:0.1.0
 ```
 
@@ -72,6 +72,8 @@ There is a sample .env file provided called .env.example to help you get started
 | `PORT` | http port on which to run the express app | 4006 | no |
 | `ENABLE_HTTPS_FOR_DEV` | runs the dev server over https - ONLY FOR DEV - typically to allow CORS calls from a browser | false | no |
 | `TENANT_SEED_{TENANT_NAME}` | see [tenants](#tenants) section for instructions | no | no |
+|`TENANT_DIDMETHOD_{TENANT_NAME}` | did method (`key` or `web`) to use for signing on this tenant | `key` | no |
+| `TENANT_DID_URL_{TENANT_NAME}` | url to use for did:web | | no |
 | `ERROR_LOG_FILE` | log file for all errors - see [Logging](#logging) | no | no |
 | `LOG_ALL_FILE` | log file for everything - see [Logging](#logging) | no | no |
 | `CONSOLE_LOG_LEVEL` | console log level - see [Logging](#logging) | silly | no |
@@ -178,7 +180,7 @@ The signing-service uses the seed to deterministically generate the signing key.
 
 NOTE: there is also an option to set the seed value for a tenant to `generate`. The system will generate a random signing key for any tenants so configured. This is really only useful for testing and experimenting since the keys are lost on restart, and the associated [DID](https://www.w3.org/TR/did-core/) for each is not registered in any public registry.
 
-The `did` value is meant to be shared with others, typically by publishing it in a public registry for use by verifiers.  So about registries... 
+The `did` value is meant to be shared with others, typically by publishing it in a public registry for use by verifiers.  So about registries...
 
 ### DID Registries
 
@@ -192,7 +194,9 @@ For the moment, the issuer is set up to use the did:key implemenation of a [DID]
 
 ### did:web
 
-The did:web implementation is likely where most implementations will end up, and so you'll eventually want to move to becuase it allows you to rotate (change) your signing keys whithout having to update every document that points at the old keys.  We'll provide did:web support in time, but if you need it now just let us know.
+The did:web implementation is preferable for production becuase it allows you to rotate (change) your signing keys whithout having to update every document that points at the old keys.
+
+To use it set `TENANT_DIDMETHOD_{TENANT_NAME}=web` and set `TENANT_DID_URL_{TENANT_NAME}` to the url where your `.well-known/did.json` did-document is hosted.
 
 ## Usage
 
@@ -346,7 +350,7 @@ The signing-service doesn't on its own provide a revocation mechanism. To enable
 
 ## Versioning
 
-The signing-service is primarily intended to run as a docker image within a docker compose network, typically as part of a flow that is orchestrated by the [DCC Issuer Coordinator](https://github.com/digitalcredentials/issuer-coordinator) and the [DCC Workflow Coordinator](https://github.com/digitalcredentials/workflow-coordinator). 
+The signing-service is primarily intended to run as a docker image within a docker compose network, typically as part of a flow that is orchestrated by the [DCC Issuer Coordinator](https://github.com/digitalcredentials/issuer-coordinator) and the [DCC Workflow Coordinator](https://github.com/digitalcredentials/workflow-coordinator).
 
 For convenience we've published the images for the signing-service and the other services used by the coordinators, as well as for the coordinators themselves, to Docker Hub so that you don't have to build them locally yourself from the github repositories.
 
@@ -380,7 +384,7 @@ You may set the log level for the application as whole, e.g.,
 
 ```LOG_LEVEL=http```
 
-Which would only log messages with severity 'http' and all below it (info, warn, error). 
+Which would only log messages with severity 'http' and all below it (info, warn, error).
 
 The default is to log everything (level 'silly').
 
