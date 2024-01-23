@@ -10,7 +10,7 @@ const defaultLogLevel = 'silly'
 const testSeed = 'z1AeiPT496wWmo9BG2QYXeTusgFSZPNG3T9wNeTtjrQ3rCB'
 const testTenantName = 'testing'
 const randomTenantName = 'random'
-const DID_SEEDS = {}
+let DID_SEEDS = {}
 
 export function setConfig() {
   CONFIG = parseConfig()
@@ -71,6 +71,7 @@ export function getConfig() {
 
 export function resetConfig() {
   CONFIG = null
+  DID_SEEDS = {}
 }
 
 export async function getTenantSeed(tenantName) {
