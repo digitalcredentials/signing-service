@@ -2,6 +2,7 @@ import { driver } from '@digitalcredentials/did-method-key'
 import { decodeSecretKeySeed } from '@digitalcredentials/bnid'
 import { expect } from 'chai'
 import request from 'supertest'
+import { resetConfig } from './config.js'
 import {
   ed25519_2020suiteContext,
   getCredentialStatus,
@@ -136,6 +137,34 @@ describe('api', () => {
       expect(response.header['content-type']).to.have.string('json')
       expect(response.status).to.eql(200)
       expect(response.body.credentialStatus).to.eql(statusBeforeSigning)
+    })
+  })
+  describe('DID:web', () => {
+    const tenantName = 'apptest'
+
+    before(() => {
+      resetConfig()
+      process.env[`TENANT_SEED_${tenantName}`] =
+        'z1AeiPT496wWmo9BG2QYXeTusgFSZPNG3T9wNeTtjrQ3rCB'
+      process.env[`TENANT_DIDMETHOD_${tenantName}`] = 'web'
+      process.env[`TENANT_DID_URL_${tenantName}`] = 'https://example.com'
+    })
+
+    after(() => {
+      delete process.env[`TENANT_SEED_${tenantName}`]
+      delete process.env[`TENANT_DIDMETHOD_${tenantName}`]
+      delete process.env[`TENANT_DID_URL_${tenantName}`]
+    })
+
+    it('signs with a did:web', async () => {
+      await request(app)
+        .post(`/instance/${tenantName}/credentials/sign`)
+        .send(getUnsignedVCWithStatus())
+        .expect('Content-Type', /json/)
+        .expect((res) =>
+          expect(res.body.issuer.id).to.eql('did:web:example.com')
+        )
+        .expect(200)
     })
   })
 })

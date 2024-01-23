@@ -1,4 +1,6 @@
 import { Ed25519Signature2020 } from '@digitalcredentials/ed25519-signature-2020'
+import { Ed25519VerificationKey2020 } from '@digitalcredentials/ed25519-verification-key-2020'
+import { CryptoLD } from 'crypto-ld'
 import { driver as keyDriver } from '@digitalcredentials/did-method-key'
 import { driver as webDriver } from '@interop/did-web-resolver'
 import { securityLoader } from '@digitalcredentials/security-document-loader'
@@ -9,8 +11,11 @@ import SigningException from './SigningException.js'
 const ISSUER_INSTANCES = {}
 const documentLoader = securityLoader().build()
 
+const cryptoLd = new CryptoLD()
+cryptoLd.use(Ed25519VerificationKey2020)
+
 const buildIssuerInstance = async (seed, method, url) => {
-  const didDriver = method === 'web' ? webDriver() : keyDriver()
+  const didDriver = method === 'web' ? webDriver({ cryptoLd }) : keyDriver()
   const { didDocument, methodFor } = await didDriver.generate({
     seed,
     ...(url ? { url } : null)
