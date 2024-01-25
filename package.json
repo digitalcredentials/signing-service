@@ -8,7 +8,8 @@
     "dev-noenv": "nodemon server.js",
     "lint": "eslint .  --ext .js",
     "lint-fix": "eslint --fix .  --ext .js",
-    "test": "NODE_OPTIONS=--experimental-vm-modules npx mocha --timeout 10000 -r dotenv/config dotenv_config_path=src/test-fixtures/.env.testing src/*.test.js",
+    "test": "NODE_OPTIONS=--experimental-vm-modules npx c8 mocha --timeout 10000 -r dotenv/config dotenv_config_path=src/test-fixtures/.env.testing src/*.test.js",
+    "coveralls": "npm run test; c8 report --reporter=text-lcov | coveralls",
     "prepare": "husky install"
   },
   "dependencies": {
@@ -29,7 +30,9 @@
     "winston": "^3.10.0"
   },
   "devDependencies": {
+    "c8": "^9.1.0",
     "chai": "^4.3.7",
+    "coveralls": "^3.1.1",
     "eslint": "^8.47.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",
