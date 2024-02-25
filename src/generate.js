@@ -2,13 +2,27 @@ import {
   generateSecretKeySeed,
   decodeSecretKeySeed
 } from '@digitalcredentials/bnid'
-import { driver } from '@digitalcredentials/did-method-key'
+import { Ed25519VerificationKey2020 } from '@digitalcredentials/ed25519-verification-key-2020'
+import { CryptoLD } from 'crypto-ld'
 
-export default async function generateSeed() {
+import { driver as keyDriver } from '@digitalcredentials/did-method-key'
+import { driver as webDriver } from '@interop/did-web-resolver'
+
+export default async function generateSeed({ url = false }) {
   const seed = await generateSecretKeySeed()
   const decodedSeed = await decodeSeed(seed)
-  const didKeyDriver = driver()
-  const { didDocument } = await didKeyDriver.generate({ seed: decodedSeed })
+  let didDocument
+  if (url) {
+    const cryptoLd = new CryptoLD()
+    cryptoLd.use(Ed25519VerificationKey2020)
+    const didDriver = webDriver({ cryptoLd })
+    const result = await didDriver.generate({ seed: decodedSeed, url })
+    didDocument = result.didDocument
+  } else {
+    const didDriver = keyDriver()
+    const result = await didDriver.generate({ seed: decodedSeed })
+    didDocument = result.didDocument
+  }
   const did = didDocument.id
   return { seed, decodedSeed, did, didDocument }
 }
