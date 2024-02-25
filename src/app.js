@@ -39,9 +39,28 @@ export async function build() {
     }
   })
 
+  app.get('/did-key-generator', async (req, res, next) => {
+    try {
+      const newSeed = await generateSeed({})
+      res.json(newSeed)
+    } catch (e) {
+      next(e)
+    }
+  })
+
   app.get('/seedgen', async (req, res, next) => {
     try {
-      const newSeed = await generateSeed()
+      const newSeed = await generateSeed({})
+      res.json(newSeed)
+    } catch (e) {
+      next(e)
+    }
+  })
+
+  app.post('/did-web-generator', async (req, res, next) => {
+    try {
+      const { url } = req.body
+      const newSeed = await generateSeed({ url })
       res.json(newSeed)
     } catch (e) {
       next(e)

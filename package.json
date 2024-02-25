@@ -24,6 +24,7 @@
     "@interop/did-web-resolver": "^3.0.1",
     "base32-encode": "^2.0.0",
     "cors": "^2.8.5",
+    "crypto-ld": "^7.0.0",
     "dotenv": "^16.0.3",
     "express": "~4.16.1",
     "morgan": "~1.9.1",

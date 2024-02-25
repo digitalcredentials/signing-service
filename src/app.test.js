@@ -167,4 +167,53 @@ describe('api', () => {
         .expect(200)
     })
   })
+
+  describe('/did-web-generator', () => {
+    it('returns a new did:web', async () => {
+      await request(app)
+        .post(`/did-web-generator`)
+        .send({
+          url: 'https://raw.githubusercontent.com/jchartrand/didWebTest/main'
+        })
+        .expect('Content-Type', /json/)
+        .expect((res) => {
+          expect(res.body.seed).to.exist
+          expect(res.body.didDocument.id).to.eql(
+            'did:web:raw.githubusercontent.com:jchartrand:didWebTest:main'
+          )
+          expect(res.body.did).to.eql(
+            'did:web:raw.githubusercontent.com:jchartrand:didWebTest:main'
+          )
+        })
+        .expect(200)
+    })
+  })
+
+  describe('/did-key-generator', () => {
+    it('returns a new did:key', async () => {
+      await request(app)
+        .get(`/did-key-generator`)
+        .expect('Content-Type', /json/)
+        .expect((res) => {
+          expect(res.body.seed).to.exist
+          expect(res.body.didDocument.id).to.contain('did:key')
+          expect(res.body.did).to.contain('did:key')
+        })
+        .expect(200)
+    })
+  })
+
+  describe('/did-key-generator', () => {
+    it('returns a new did:key', async () => {
+      await request(app)
+        .get(`/seedgen`)
+        .expect('Content-Type', /json/)
+        .expect((res) => {
+          expect(res.body.seed).to.exist
+          expect(res.body.didDocument.id).to.contain('did:key')
+          expect(res.body.did).to.contain('did:key')
+        })
+        .expect(200)
+    })
+  })
 })
