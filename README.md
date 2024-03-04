@@ -11,6 +11,8 @@ IMPORTANT NOTE ABOUT VERSIONING: If you are using a Docker Hub image of this rep
   - [Environment Variables](#environment-variables)
   - [Tenants](#tenants)
   - [Signing Key](#signing-key)
+    - [did:key generator](#didkey-generator)
+    - [did:web generator](#didweb-generator)
   - [DID Registries](#did-registries)
   - [did:key](#didkey)
   - [did:web](#didweb)
@@ -29,15 +31,19 @@ IMPORTANT NOTE ABOUT VERSIONING: If you are using a Docker Hub image of this rep
 
 Use this express server to sign [Verifiable Credentials](https://www.w3.org/TR/vc-data-model/).
 
-Implements two http endpoints:
+Implements three http endpoints:
 
  * POST /instance/:instanceId/credentials/sign
 
 Which signs and returns a [Verifiable Credential](https://www.w3.org/TR/vc-data-model/) that has been posted to it.
 
- * GET /seedgen
+ * GET /did-key-generator
 
-Which is a convenience method for generating a new signing key, encoded as a [Decentralized Identifier (DID)](https://www.w3.org/TR/did-core/)
+Which is a convenience method for generating a new signing key, encoded as a [Decentralized Identifier (DID)](https://www.w3.org/TR/did-core/) and specifically using the [did:key method](https://w3c-ccg.github.io/did-method-key/). Read about how to use it in the [did:key generator section](#didkey-generator).
+
+* POST /did-web-generator
+
+Which is a convenience method for generating a new signing key, encoded as a [Decentralized Identifier (DID)](https://www.w3.org/TR/did-core/), specifically using the [did:web method](https://w3c-ccg.github.io/did-method-web/). Read about how to use it in the [did:web generator section](#didweb-generator).
 
 The signing endpoint is meant to be called as a RESTful service from any software wanting to sign a credential, and in particular is so used by the [DCC issuer-coordinator](https://github.com/digitalcredentials/issuer-coordinator) and the  [DCC workflow-coordinator](https://github.com/digitalcredentials/worfklow-coordinator) from within a Docker Compose network.
 
@@ -54,7 +60,7 @@ You can try this signing-service in about three minutes:
 2. From a terminal prompt, run:
 
 ```
-docker run -dp 4006:4006 digitalcredentials/signing-service:0.1.0
+docker run -dp 4006:4006 digitalcredentials/signing-service:0.2.0
 ```
 
 You can now issue test credentials as explained in the [Sign a Credential](#sign-a-credential) section.
@@ -83,7 +89,7 @@ There is a sample .env file provided called .env.example to help you get started
 
 You might want to allow more than one signing key ([DID](https://www.w3.org/TR/did-core/)) to be used with the issuer. For example, you might want to sign university/college degree diplomas with a key ([DID](https://www.w3.org/TR/did-core/)) that is only used by the registrar, but then also allow certificates for individual courses to be signed by by different keys ([DIDs](https://www.w3.org/TR/did-core/)) that are owned by the faculty or department that teaches the course.
 
-We're calling these differents signing authorities 'tenants' (or 'instances').  You can set up as many tenants as you like by including a `TENANT_SEED_{TENANT_NAME}={seed}` environment variable for every 'tenant'.
+We're calling these differents signing authorities 'tenants' (or 'instances').  You can set up as many tenants as you like by including a `TENANT_SEED_{TENANT_NAME}={seed}` environment variable for every 'tenant'. (NOTE: if you are using a did:web key, you must additinally specify `TENANT_DIDMETHOD_{TENANT_NAME}=web` and `TENANT_DID_URL_{TENANT_NAME}={the url for your did:web}`) for each did:web tenant. Read more in the [did:web generator section](#didweb-generator).
 
 NOTE: the `seed` is explained below in the [Signing key section](#signing-key).
 
@@ -127,9 +133,13 @@ Read on to generate your signing keys...
 
 The issuer is by default configured with a signing key that can only be used for testing and evaluation.
 
-To issue your own credentials you must generate your own signing key and keep it private.  We've tried to make that a little easier by providing a convenience endpoint in the issuer that you can use to generate a brand new key.  You can hit the endpoint with the following CURL command:
+To issue your own credentials you must generate your own signing key and keep it private.  We've tried to make that a little easier by providing two convenience endpoints in the issuer that you can use to generate a brand new key.  One generates a new [did:key](https://w3c-ccg.github.io/did-method-key/) and the other a new [did:web](https://w3c-ccg.github.io/did-method-web/). 
 
-`curl --location 'http://localhost:4006/seedgen'`
+#### did:key generator
+
+You can generate a new did:key by hitting the convenience endpoint with the following CURL command:
+
+`curl --location 'http://localhost:4006/did-key-generator'`
 
 This will return a json document with:
 
@@ -139,6 +149,9 @@ This will return a json document with:
 
 The returned result will look something like this:
 
+<details> 
+<summary>Show code</summary>
+  
 ```
 {
 	"seed": "z1AjQUBZCNoiyPUC8zbbF29gLdZtHRqT6yPdFGtqJa5VfQ6",
@@ -165,6 +178,7 @@ The returned result will look something like this:
 	}
 }
 ```
+</details>
 
 The two important properties for our purposes are the `seed` and the `did`.
 
@@ -178,9 +192,128 @@ For example,
 
 The signing-service uses the seed to deterministically generate the signing key.
 
-NOTE: there is also an option to set the seed value for a tenant to `generate`. The system will generate a random signing key for any tenants so configured. This is really only useful for testing and experimenting since the keys are lost on restart, and the associated [DID](https://www.w3.org/TR/did-core/) for each is not registered in any public registry.
+The `did` value is meant to be shared with others, typically by publishing it in a public registry for use by verifiers.  Read about registries in the [registries section](#did-registries).
 
-The `did` value is meant to be shared with others, typically by publishing it in a public registry for use by verifiers.  So about registries...
+#### did:web generator
+
+Setting up a did:web is a bit more complicated because - unlike a did:key - a did `document` has to be publicly available and in particular for a did:web, must be hosted at a public url.
+
+So you can generate a did:web document using our other convenience endpoint:
+
+```POST /did-web-generator```
+
+In this case you'll need to POST a json document to the endpoint. Here is a curl command that will do exactly that, assuming you are running the signing-service on localhost with the default port of 4006:
+
+```
+curl --location 'localhost:4006/did-web-generator' \
+--header 'Content-Type: application/json' \
+--data '{"url": "https://raw.githubusercontent.com/jchartrand/didWebTest/main"}'
+```
+
+The value of 'url' property should be the url at which you will host your did:web document.
+For the url above, the document will actually need to be hosted at:
+
+```https://raw.githubusercontent.com/jchartrand/didWebTest/main/.well-known/did.json```
+
+But, when generating the did, leave off the '.well-known/did.json' part. That bit is assumed, according to the did:web specification.
+
+So that curl will return a document something like so:
+
+<details> 
+<summary>Show code</summary>
+
+```
+{
+    "seed": "z1AcNXDnko1P6QMiZ3bxsraNvVtRbpXKeE8GNLDXjBJ5UHz",
+    "decodedSeed": {
+        "0": 89,
+        "1": 128,
+        "2": 252,
+        "3": 66,
+        "4": 213,
+        "5": 112,
+        "6": 253,
+        "7": 4,
+        "8": 191,
+        "9": 207,
+        "10": 205,
+        "11": 80,
+        "12": 127,
+        "13": 53,
+        "14": 58,
+        "15": 35,
+        "16": 154,
+        "17": 249,
+        "18": 38,
+        "19": 97,
+        "20": 31,
+        "21": 129,
+        "22": 54,
+        "23": 213,
+        "24": 196,
+        "25": 25,
+        "26": 214,
+        "27": 6,
+        "28": 217,
+        "29": 134,
+        "30": 93,
+        "31": 21
+    },
+    "did": "did:web:raw.githubusercontent.com:jchartrand:didWebTest:main",
+    "didDocument": {
+        "@context": [
+            "https://www.w3.org/ns/did/v1",
+            "https://w3id.org/security/suites/ed25519-2020/v1",
+            "https://w3id.org/security/suites/x25519-2020/v1"
+        ],
+        "id": "did:web:raw.githubusercontent.com:jchartrand:didWebTest:main",
+        "assertionMethod": [
+            {
+                "id": "did:web:raw.githubusercontent.com:jchartrand:didWebTest:main#z6MkfGZKFTyxiH9HgFUHbPQigEWh8PtFaRkESt9oQLiTvhVq",
+                "type": "Ed25519VerificationKey2020",
+                "controller": "did:web:raw.githubusercontent.com:jchartrand:didWebTest:main",
+                "publicKeyMultibase": "z6MkfGZKFTyxiH9HgFUHbPQigEWh8PtFaRkESt9oQLiTvhVq"
+            }
+        ]
+    }
+}
+```
+</details>
+
+Again, as with a did:key, you'll need to set the `seed` and the `did` as described in the previous section.
+
+You will additionally need to copy the value of the didDocument property, i.e, from the example above
+
+```json
+{
+        "@context": [
+            "https://www.w3.org/ns/did/v1",
+            "https://w3id.org/security/suites/ed25519-2020/v1",
+            "https://w3id.org/security/suites/x25519-2020/v1"
+        ],
+        "id": "did:web:raw.githubusercontent.com:jchartrand:didWebTest:main",
+        "assertionMethod": [
+            {
+                "id": "did:web:raw.githubusercontent.com:jchartrand:didWebTest:main#z6MkfGZKFTyxiH9HgFUHbPQigEWh8PtFaRkESt9oQLiTvhVq",
+                "type": "Ed25519VerificationKey2020",
+                "controller": "did:web:raw.githubusercontent.com:jchartrand:didWebTest:main",
+                "publicKeyMultibase": "z6MkfGZKFTyxiH9HgFUHbPQigEWh8PtFaRkESt9oQLiTvhVq"
+            }
+        ]
+    }
+```
+
+and save that in a file called did.json at the url where you'll host the document. So for our example at:
+
+```https://raw.githubusercontent.com/jchartrand/didWebTest/main/.well-known/did.json```
+
+You must also set `TENANT_DIDMETHOD_{TENANT_NAME}=web` and set `TENANT_DID_URL_{TENANT_NAME}` to the url where your `.well-known/did.json` did-document is hosted, which for this example would be:
+
+```https://raw.githubusercontent.com/jchartrand/didWebTest/main```
+
+#### random tenant key
+
+NOTE: there is also an option to set the seed value for a tenant to `generate`. The system will generate a random did:key for any tenants so configured. This is really only useful for testing and experimenting since the keys are lost on restart, and the associated [DID](https://www.w3.org/TR/did-core/) for each is not registered in any public registry.
 
 ### DID Registries
 
@@ -190,7 +323,7 @@ The DCC provides a number of registries that work with the verifiers in the Lear
 
 ### did:key
 
-For the moment, the issuer is set up to use the did:key implemenation of a [DID](https://www.w3.org/TR/did-core/) which is one of the simpler implementations and doesn't require that the [DID](https://www.w3.org/TR/did-core/) document be hosted anywhere.
+The issuer is by default set up to use the did:key implemenation of a [DID](https://www.w3.org/TR/did-core/) which is one of the simpler implementations and doesn't require that the [DID](https://www.w3.org/TR/did-core/) document be hosted anywhere.
 
 ### did:web
 
@@ -228,6 +361,9 @@ Note that to run this with Docker, you'll of course need to install Docker, whic
 
 Try it out with this CURL command, which you simply paste into the terminal (once you've got your issuer running on your computer, as described above):
 
+<details> 
+<summary>Show code</summary>
+  
 ```
 curl --location 'http://localhost:4006/instance/test/credentials/sign' \
 --header 'Content-Type: application/json' \
@@ -277,10 +413,13 @@ curl --location 'http://localhost:4006/instance/test/credentials/sign' \
   }
 }'
 ```
+</details>
 
 This should return a fully formed and signed credential printed to the terminal, that should look something like this (it may be all smushed up, but you can format it in something like [json lint](https://jsonlint.com):
 
-
+<details> 
+<summary>Show code</summary>
+  
 ```
 {
     "@context": [
@@ -336,6 +475,7 @@ This should return a fully formed and signed credential printed to the terminal,
     }
 }
 ```
+</details>
 
 NOTE: CURL can get a bit clunky if you want to experiment, so you might consider trying [Postman](https://www.postman.com/downloads/) which makes it very easy to construct and send http calls.
 
