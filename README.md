@@ -60,7 +60,7 @@ You can try this signing-service in about three minutes:
 2. From a terminal prompt, run:
 
 ```
-docker run -dp 4006:4006 digitalcredentials/signing-service:0.2.0
+docker run -dp 4006:4006 digitalcredentials/signing-service:0.3.0
 ```
 
 You can now issue test credentials as explained in the [Sign a Credential](#sign-a-credential) section.

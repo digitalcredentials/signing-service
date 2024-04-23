@@ -1,5 +1,6 @@
 import express from 'express'
 import cors from 'cors'
+import axios from 'axios'
 import issue from './issue.js'
 import generateSeed from './generate.js'
 import accessLogger from './middleware/accessLogger.js'
@@ -7,6 +8,8 @@ import errorHandler from './middleware/errorHandler.js'
 import errorLogger from './middleware/errorLogger.js'
 import invalidPathHandler from './middleware/invalidPathHandler.js'
 import SigningException from './SigningException.js'
+import { getUnsignedVC } from './test-fixtures/vc.js'
+import { TEST_TENANT_NAME } from './config.js'
 
 export async function build() {
   var app = express()
@@ -16,6 +19,23 @@ export async function build() {
   app.use(express.json())
   app.use(express.urlencoded({ extended: false }))
   app.use(cors())
+
+  app.get('/healthz', async function (req, res) {
+    try {
+      const { data } = await axios.post(
+        `${req.protocol}://${req.headers.host}/instance/${TEST_TENANT_NAME}/credentials/sign`,
+        getUnsignedVC()
+      )
+      if (!data.proof)
+        throw new SigningException(503, 'signing-service healthz failed')
+    } catch (e) {
+      console.log(`exception in healthz: ${e}`)
+      return res.status(503).json({
+        error: `signing-service healthz check failed with error: ${e}`
+      })
+    }
+    res.send({ message: 'signing-service server status: ok.' })
+  })
 
   app.get('/', function (req, res) {
     res.send({ message: 'signing-service server status: ok.' })

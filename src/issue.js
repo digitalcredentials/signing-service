@@ -4,15 +4,20 @@ import { CryptoLD } from 'crypto-ld'
 import { driver as keyDriver } from '@digitalcredentials/did-method-key'
 import { driver as webDriver } from '@interop/did-web-resolver'
 import { securityLoader } from '@digitalcredentials/security-document-loader'
-import { IssuerInstance } from '@digitalcredentials/issuer-core'
+import { IssuerInstance } from '@digitalcredentials/issuer-instance'
 import { getTenantSeed } from './config.js'
 import SigningException from './SigningException.js'
 
-const ISSUER_INSTANCES = {}
+let ISSUER_INSTANCES = {}
 const documentLoader = securityLoader().build()
 
 const cryptoLd = new CryptoLD()
 cryptoLd.use(Ed25519VerificationKey2020)
+
+/* FOR TESTING */
+export const clearIssuerInstances = () => {
+  ISSUER_INSTANCES = {}
+}
 
 const buildIssuerInstance = async (seed, method, url) => {
   const didDriver = method === 'web' ? webDriver({ cryptoLd }) : keyDriver()
