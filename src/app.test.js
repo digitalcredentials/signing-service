@@ -2,7 +2,13 @@ import { driver } from '@digitalcredentials/did-method-key'
 import { decodeSecretKeySeed } from '@digitalcredentials/bnid'
 import { expect } from 'chai'
 import request from 'supertest'
-import { resetConfig } from './config.js'
+import { clearIssuerInstances } from './issue.js'
+import {
+  resetConfig,
+  deleteSeed,
+  TEST_TENANT_NAME,
+  getTenantSeed
+} from './config.js'
 import {
   ed25519_2020suiteContext,
   getCredentialStatus,
@@ -214,6 +220,46 @@ describe('api', () => {
           expect(res.body.did).to.contain('did:key')
         })
         .expect(200)
+    })
+  })
+
+  describe('/healthz', () => {
+    it('returns 200 when healthy', async () => {
+      await request(app)
+        .get(`/healthz`)
+        .expect('Content-Type', /json/)
+        .expect((res) => {
+          expect(res.body.message).to.contain('ok')
+        })
+        .expect(200)
+    })
+  })
+
+  describe('/healthz fail', () => {
+    // to force an error with the health check, we remove the
+    // test issuer instance and it's signing seed
+
+    beforeEach(async () => {
+      // make sure all seeds have been loaded before we remove the test seed
+      await getTenantSeed(TEST_TENANT_NAME)
+      deleteSeed(TEST_TENANT_NAME)
+      clearIssuerInstances()
+    })
+
+    after(async () => {
+      resetConfig()
+    })
+
+    it('returns 503 when not healthy', async () => {
+      await request(app)
+        .get(`/healthz`)
+        .expect('Content-Type', /json/)
+        .expect((res) => {
+          console.log('the body:')
+          console.log(res.body)
+          expect(res.body.error).to.contain('error')
+        })
+        .expect(503)
     })
   })
 })

@@ -10,18 +10,18 @@
     "lint-fix": "eslint --fix .  --ext .js",
     "test": "NODE_OPTIONS=--experimental-vm-modules npx c8 mocha --timeout 10000 -r dotenv/config dotenv_config_path=src/test-fixtures/.env.testing src/*.test.js",
     "coveralls": "npm run test; c8 report --reporter=text-lcov | coveralls",
-    "prepare": "husky install"
+    "prepare": "test -d node_modules/husky && husky install || echo \"husky is not installed\""
   },
   "dependencies": {
     "@digitalcredentials/bnid": "^2.1.2",
     "@digitalcredentials/cborld": "^4.3.4",
     "@digitalcredentials/ed25519-signature-2020": "^3.0.2",
     "@digitalcredentials/ed25519-verification-key-2020": "^4.0.0",
-    "@digitalcredentials/issuer-core": "github:digitalcredentials/issuer-core",
+    "@digitalcredentials/issuer-instance": "^1.0.5",
     "@digitalcredentials/security-document-loader": "^3.1.0",
-    "@digitalcredentials/status-list-manager-git": "github:digitalcredentials/status-list-manager-git",
     "@digitalcredentials/vc": "^5.0.0",
     "@interop/did-web-resolver": "^3.0.1",
+    "axios": "^1.6.8",
     "base32-encode": "^2.0.0",
     "cors": "^2.8.5",
     "crypto-ld": "^7.0.0",
