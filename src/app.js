@@ -29,12 +29,13 @@ export async function build() {
       if (!data.proof)
         throw new SigningException(503, 'signing-service healthz failed')
     } catch (e) {
-      console.log(`exception in healthz: ${e}`)
+      console.log(`exception in healthz: ${JSON.stringify(e)}`)
       return res.status(503).json({
-        error: `signing-service healthz check failed with error: ${e}`
+        error: `signing-service healthz check failed with error: ${e}`,
+        healthy: false
       })
     }
-    res.send({ message: 'signing-service server status: ok.' })
+    res.send({ message: 'signing-service server status: ok.', healthy: true })
   })
 
   app.get('/', function (req, res) {
