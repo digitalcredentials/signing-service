@@ -9,6 +9,7 @@ const defaultConsoleLogLevel = 'silly'
 const defaultLogLevel = 'silly'
 const testSeed = 'z1AeiPT496wWmo9BG2QYXeTusgFSZPNG3T9wNeTtjrQ3rCB'
 export const TEST_TENANT_NAME = 'testing'
+export const SECOND_TEST_TENANT_NAME = 'test'
 const randomTenantName = 'random'
 let DID_SEEDS = {}
 
@@ -19,6 +20,11 @@ export function setConfig() {
 async function parseTenantSeeds() {
   // add in the default test key now, so it can be overridden by env
   DID_SEEDS[TEST_TENANT_NAME] = {
+    didSeed: await decodeSeed(testSeed),
+    didMethod: 'key'
+  }
+  // and again with a different tenant name
+  DID_SEEDS[SECOND_TEST_TENANT_NAME] = {
     didSeed: await decodeSeed(testSeed),
     didMethod: 'key'
   }
