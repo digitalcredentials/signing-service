@@ -2,7 +2,7 @@
 
 [![Build status](https://img.shields.io/github/actions/workflow/status/digitalcredentials/signing-service/main.yml?branch=main)](https://github.com/digitalcredentials/signing-service/actions?query=workflow%3A%22Node.js+CI%22)
 
-IMPORTANT NOTE ABOUT VERSIONING: If you are using a Docker Hub image of this repository, make sure you are reading the version of this README that corresponds to your Docker Hub version.  If, for example, you are using the image `digitalcredentials/status-service:0.1.0` then you'll want to use the corresponding tagged repo: [https://github.com/digitalcredentials/status-service/tree/v0.1.0](https://github.com/digitalcredentials/status-service/tree/v0.1.0). If you are new here, then just read on...
+IMPORTANT NOTE ABOUT VERSIONING: If you are using a Docker Hub image of this repository, make sure you are reading the version of this README that corresponds to your Docker Hub version. If, for example, you are using the image `digitalcredentials/status-service-db:0.1.0` then you'll want to use the corresponding tagged repo: [https://github.com/digitalcredentials/status-service-db/tree/v0.1.0](https://github.com/digitalcredentials/status-service-db/tree/v0.1.0). If you are new here, then just read on...
 
 ## Table of Contents
 
@@ -13,16 +13,18 @@ IMPORTANT NOTE ABOUT VERSIONING: If you are using a Docker Hub image of this rep
   - [Signing Key](#signing-key)
     - [did:key generator](#didkey-generator)
     - [did:web generator](#didweb-generator)
-  - [DID Registries](#did-registries)
+    - [Random tenant key](#random-tenant-key)
   - [did:key](#didkey)
   - [did:web](#didweb)
-  - [Revocation](#revocation)
+  - [DID Registries](#did-registries)
 - [Usage](#usage)
   - [Sign a credential](#sign-a-credential)
   - [Learner Credential Wallet](#learner-credential-wallet)
+  - [Revocation and Suspension](#revocation-and-suspension)
 - [Versioning](#versioning)
 - [Logging](#logging)
 - [Development](#development)
+  - [Installation](#installation)
   - [Testing](#testing)
 - [Contribute](#contribute)
 - [License](#license)
@@ -31,25 +33,25 @@ IMPORTANT NOTE ABOUT VERSIONING: If you are using a Docker Hub image of this rep
 
 Use this express server to sign [Verifiable Credentials](https://www.w3.org/TR/vc-data-model/).
 
-Implements three http endpoints:
+Implements three HTTP endpoints:
 
- * POST /instance/:instanceId/credentials/sign
+ * `POST /instance/:instanceId/credentials/sign`
 
-Which signs and returns a [Verifiable Credential](https://www.w3.org/TR/vc-data-model/) that has been posted to it.
+This endpoint signs and returns a [Verifiable Credential](https://www.w3.org/TR/vc-data-model/) that has been posted to it.
 
- * GET /did-key-generator
+ * `GET /did-key-generator`
 
-Which is a convenience method for generating a new signing key, encoded as a [Decentralized Identifier (DID)](https://www.w3.org/TR/did-core/) and specifically using the [did:key method](https://w3c-ccg.github.io/did-method-key/). Read about how to use it in the [did:key generator section](#didkey-generator).
+This is a convenience endpoint for generating a new signing key, encoded as a [Decentralized Identifier (DID)](https://www.w3.org/TR/did-core/) and specifically using the [did:key method](https://w3c-ccg.github.io/did-method-key/). Read about how to use it in the [did:key generator section](#didkey-generator).
 
-* POST /did-web-generator
+* `POST /did-web-generator`
 
-Which is a convenience method for generating a new signing key, encoded as a [Decentralized Identifier (DID)](https://www.w3.org/TR/did-core/), specifically using the [did:web method](https://w3c-ccg.github.io/did-method-web/). Read about how to use it in the [did:web generator section](#didweb-generator).
+This is a convenience endpoint for generating a new signing key, encoded as a [Decentralized Identifier (DID)](https://www.w3.org/TR/did-core/), specifically using the [did:web method](https://w3c-ccg.github.io/did-method-web/). Read about how to use it in the [did:web generator section](#didweb-generator).
 
 The signing endpoint is meant to be called as a RESTful service from any software wanting to sign a credential, and in particular is so used by the [DCC issuer-coordinator](https://github.com/digitalcredentials/issuer-coordinator) and the  [DCC workflow-coordinator](https://github.com/digitalcredentials/worfklow-coordinator) from within a Docker Compose network.
 
 This service supports multiple signing keys ([DIDs](https://www.w3.org/TR/did-core/)), identified by the `:instanceId` in the signing endpoint's path. An `instance` is analagous to a `tenant`.
 
-You may also want to take a look at the [DCC issuer-coordinator](https://github.com/digitalcredentials/issuer-coordinator), as it provides bearer token security over tenant endpoints, and combines both signing and status revocation as a single service. It also describes a model for composing DCC services within a Docker Compose network.
+You may also want to take a look at the [DCC issuer-coordinator](https://github.com/digitalcredentials/issuer-coordinator), as it provides bearer token security over tenant endpoints, and combines both signing and status updates (e.g., revocation and suspension) as a single service. It also describes a model for composing DCC services within a Docker Compose network.
 
 ## Quick Start
 
@@ -59,7 +61,7 @@ You can try this signing-service in about three minutes:
 
 2. From a terminal prompt, run:
 
-```
+```bash
 docker run -dp 4006:4006 digitalcredentials/signing-service:0.3.0
 ```
 
@@ -75,8 +77,8 @@ There is a sample .env file provided called .env.example to help you get started
 
 | Key | Description | Default | Required |
 | --- | --- | --- | --- |
-| `PORT` | http port on which to run the express app | 4006 | no |
-| `ENABLE_HTTPS_FOR_DEV` | runs the dev server over https - ONLY FOR DEV - typically to allow CORS calls from a browser | false | no |
+| `PORT` | HTTP port on which to run the express app | 4006 | no |
+| `ENABLE_HTTPS_FOR_DEV` | runs the dev server over HTTPS - ONLY FOR DEV - typically to allow CORS calls from a browser | false | no |
 | `TENANT_SEED_{TENANT_NAME}` | see [tenants](#tenants) section for instructions | no | no |
 |`TENANT_DID_METHOD_{TENANT_NAME}` | did method (`key` or `web`) to use for signing on this tenant | `key` | no |
 | `TENANT_DID_URL_{TENANT_NAME}` | url to use for did:web | | no |
@@ -123,7 +125,7 @@ The `test` tenant uses this seed and corresponding [DID](https://www.w3.org/TR/d
 
 That [DID](https://www.w3.org/TR/did-core/) for the `test` tenant is currently registered in the [DCC Sandbox Registry](https://github.com/digitalcredentials/sandbox-registry) so that any credentials generated with that tenant will, when verified, show as having originated from the DCC test issuer.
 
-See the [Sign a credential](#sign-a-credential) section for a working CURL example of how to sign with the `test` tenant.
+See the [Sign a credential](#sign-a-credential) section for a working cURL example of how to sign with the `test` tenant.
 
 The `random` tenant generates a random signing key every time the server is started. This is strictly meant for testing and experimenting. For production use, you must generate your own signing keys.
 
@@ -137,9 +139,11 @@ To issue your own credentials you must generate your own signing key and keep it
 
 #### did:key generator
 
-You can generate a new did:key by hitting the convenience endpoint with the following CURL command:
+You can generate a new did:key by hitting the convenience endpoint with the following cURL command:
 
-`curl --location 'http://localhost:4006/did-key-generator'`
+```bash
+curl --location 'http://localhost:4006/did-key-generator'
+```
 
 This will return a json document with:
 
@@ -150,9 +154,9 @@ This will return a json document with:
 The returned result will look something like this:
 
 <details> 
-<summary>Show code</summary>
+<summary>Show output</summary>
   
-```
+```json
 {
 	"seed": "z1AjQUBZCNoiyPUC8zbbF29gLdZtHRqT6yPdFGtqJa5VfQ6",
 	"did": "did:key:z6MkweTn1XVAiFfHjiH48oLknjNqRs43ayzguc8G8VbEAVm4",
@@ -200,29 +204,31 @@ Setting up a did:web is a bit more complicated because - unlike a did:key - a di
 
 So you can generate a did:web document using our other convenience endpoint:
 
-```POST /did-web-generator```
+`POST /did-web-generator`
 
-In this case you'll need to POST a json document to the endpoint. Here is a curl command that will do exactly that, assuming you are running the signing-service on localhost with the default port of 4006:
+In this case you'll need to POST a JSON document to the endpoint. Here is a cURL command that will do exactly that, assuming you are running the `signing-service` on localhost with the default port of 4006:
 
-```
+```bash
 curl --location 'localhost:4006/did-web-generator' \
 --header 'Content-Type: application/json' \
---data '{"url": "https://raw.githubusercontent.com/jchartrand/didWebTest/main"}'
+--data-raw '{
+  "url": "https://raw.githubusercontent.com/jchartrand/didWebTest/main"
+}'
 ```
 
-The value of 'url' property should be the url at which you will host your did:web document.
-For the url above, the document will actually need to be hosted at:
+The value of 'url' property should be the url at which you will host your `did:web` document.
+For the url above, the document will actually need to be hosted at the following URL:
 
-```https://raw.githubusercontent.com/jchartrand/didWebTest/main/.well-known/did.json```
+`https://raw.githubusercontent.com/jchartrand/didWebTest/main/.well-known/did.json`
 
-But, when generating the did, leave off the '.well-known/did.json' part. That bit is assumed, according to the did:web specification.
+But, when generating the did, leave off the '.well-known/did.json' part. That bit is assumed, according to the `did:web` specification.
 
-So that curl will return a document something like so:
+This cURL command will return a document like the following:
 
 <details> 
-<summary>Show code</summary>
+<summary>Show output</summary>
 
-```
+```json
 {
     "seed": "z1AcNXDnko1P6QMiZ3bxsraNvVtRbpXKeE8GNLDXjBJ5UHz",
     "decodedSeed": {
@@ -282,7 +288,7 @@ So that curl will return a document something like so:
 
 Again, as with a did:key, you'll need to set the `seed` and the `did` as described in the previous section.
 
-You will additionally need to copy the value of the didDocument property, i.e, from the example above
+You will additionally need to copy the value of the `didDocument` property, i.e., from the example above:
 
 ```json
 {
@@ -303,33 +309,33 @@ You will additionally need to copy the value of the didDocument property, i.e, f
     }
 ```
 
-and save that in a file called did.json at the url where you'll host the document. So for our example at:
+and save that in a file called `did.json` at the URL where you'll host the document. For our example, this would be the following:
 
-```https://raw.githubusercontent.com/jchartrand/didWebTest/main/.well-known/did.json```
+`https://raw.githubusercontent.com/jchartrand/didWebTest/main/.well-known/did.json`
 
-You must also set `TENANT_DID_METHOD_{TENANT_NAME}=web` and set `TENANT_DID_URL_{TENANT_NAME}` to the url where your `.well-known/did.json` did-document is hosted, which for this example would be:
+You must also set `TENANT_DID_METHOD_{TENANT_NAME}=web` and set `TENANT_DID_URL_{TENANT_NAME}` to the URL where your `.well-known/did.json` did-document is hosted, which for this example would be:
 
-```https://raw.githubusercontent.com/jchartrand/didWebTest/main```
+`https://raw.githubusercontent.com/jchartrand/didWebTest/main`
 
-#### random tenant key
+#### Random tenant key
 
-NOTE: there is also an option to set the seed value for a tenant to `generate`. The system will generate a random did:key for any tenants so configured. This is really only useful for testing and experimenting since the keys are lost on restart, and the associated [DID](https://www.w3.org/TR/did-core/) for each is not registered in any public registry.
+There is also an option to set the seed value for a tenant to `generate`. The system will generate a random did:key for any tenants so configured. This is really only useful for testing and experimenting since the keys are lost on restart, and the associated [DID](https://www.w3.org/TR/did-core/) for each is not registered in any public registry.
+
+### did:key
+
+The issuer is by default set up to use the `did:key` implemenation of a [DID](https://www.w3.org/TR/did-core/) which is one of the simpler implementations and doesn't require that the [DID](https://www.w3.org/TR/did-core/) document be hosted anywhere.
+
+### did:web
+
+The `did:web` implementation is preferable for production becuase it allows you to rotate (change) your signing keys whithout having to update every document that points at the old keys.
+
+To use it set `TENANT_DID_METHOD_{TENANT_NAME}=web` and set `TENANT_DID_URL_{TENANT_NAME}` to the url where your `.well-known/did.json` DID document is hosted.
 
 ### DID Registries
 
 So that a verifier knows that a credential was signed by a key that is really owned by the claimed issuer, the key (encoded as a [DID](https://www.w3.org/TR/did-core/)) has to be confirmed as really belonging to that issuer.  This is typically done by adding the DID to a well known registry that the verifier checks when verifying a credential.
 
-The DCC provides a number of registries that work with the verifiers in the Learner Credential Wallet and in the online web based [Verifier Plus](https://verifierplus.org).  The DCC registries use Github for storage.  To request that your [DID](https://www.w3.org/TR/did-core/) be added to a registry, submit a pull request in which you've added your [DID](https://www.w3.org/TR/did-core/) to the registry file.
-
-### did:key
-
-The issuer is by default set up to use the did:key implemenation of a [DID](https://www.w3.org/TR/did-core/) which is one of the simpler implementations and doesn't require that the [DID](https://www.w3.org/TR/did-core/) document be hosted anywhere.
-
-### did:web
-
-The did:web implementation is preferable for production becuase it allows you to rotate (change) your signing keys whithout having to update every document that points at the old keys.
-
-To use it set `TENANT_DID_METHOD_{TENANT_NAME}=web` and set `TENANT_DID_URL_{TENANT_NAME}` to the url where your `.well-known/did.json` did-document is hosted.
+The DCC provides a number of registries that work with the verifiers in the Learner Credential Wallet and in the online web based [Verifier Plus](https://verifierplus.org). The DCC registries use Github for storage. To request that your [DID](https://www.w3.org/TR/did-core/) be added to a registry, submit a pull request in which you've added your [DID](https://www.w3.org/TR/did-core/) to the registry file.
 
 ## Usage
 
@@ -343,11 +349,15 @@ You can start the script using NPM, like is done with the `start` script in pack
 
 You can directly from the DockerHub image, using a default configuration, with:
 
-  `docker run -dp 4006:4006 digitalcredentials/signing-service:0.1.0`
+```bash
+docker run -dp 4006:4006 digitalcredentials/signing-service:0.1.0
+```
 
 To run it with your own configuration (like with your own signing keys):
 
-``docker run --env-file .env -dp 4006:4006 digitalcredentials/signing-service:0.1.0`
+```bash
+docker run --env-file .env -dp 4006:4006 digitalcredentials/signing-service:0.1.0
+```
 
 where the `.env` file contains your environment variables. See [.env.example](./.env.example).
 
@@ -359,12 +369,12 @@ Note that to run this with Docker, you'll of course need to install Docker, whic
 
 ### Sign a credential
 
-Try it out with this CURL command, which you simply paste into the terminal (once you've got your issuer running on your computer, as described above):
+Try it out with this cURL command, which you simply paste into the terminal (once you've got your issuer running on your computer, as described above):
 
 <details> 
-<summary>Show code</summary>
+<summary>Show command</summary>
   
-```
+```bash
 curl --location 'http://localhost:4006/instance/test/credentials/sign' \
 --header 'Content-Type: application/json' \
 --data-raw '{
@@ -418,9 +428,9 @@ curl --location 'http://localhost:4006/instance/test/credentials/sign' \
 This should return a fully formed and signed credential printed to the terminal, that should look something like this (it may be all smushed up, but you can format it in something like [json lint](https://jsonlint.com):
 
 <details> 
-<summary>Show code</summary>
+<summary>Show output</summary>
   
-```
+```json
 {
     "@context": [
         "https://www.w3.org/2018/credentials/v1",
@@ -477,30 +487,29 @@ This should return a fully formed and signed credential printed to the terminal,
 ```
 </details>
 
-NOTE: CURL can get a bit clunky if you want to experiment, so you might consider trying [Postman](https://www.postman.com/downloads/) which makes it very easy to construct and send http calls.
-
+NOTE: cURL can get a bit clunky if you want to experiment, so you might consider trying [Postman](https://www.postman.com/downloads/) which makes it very easy to construct and send HTTP calls.
 
 ### Learner Credential Wallet
 
-You might now consider importing your new credential into the [Learner Credential Wallet](https://lcw.app) to see how credentials can be managed and shared from an app based wallet.  Simply copy the verifiable credential you just generated and paste it into the text box on the 'add credential' screen of the wallet.
+You might now consider importing your new credential into the [Learner Credential Wallet](https://lcw.app) to see how credentials can be managed and shared from an app based wallet. Simply copy the verifiable credential you just generated and paste it into the text box on the `Add credential` screen of the wallet.
 
-## Revocation
+### Revocation and Suspension
 
-The signing-service doesn't on its own provide a revocation mechanism. To enable revocation, you'll want to combine the signing-service with a revocation system like the [DCC status-service](https://github.com/digitalcredentials/status-service), but we've already done exactly that with the [DCC issuer-coordinator](https://github.com/digitalcredentials/issuer-coordinator).
+The `signing-service` doesn't on its own provide a status update (e.g., revocation and suspension) mechanism. To enable this feature, you'll want to combine the `signing-service` with a status service, like one of DCC's status services ([database implementation](https://github.com/digitalcredentials/status-service-db); [Git implementation](https://github.com/digitalcredentials/status-service-git)), but we've already done exactly that with the [DCC issuer-coordinator](https://github.com/digitalcredentials/issuer-coordinator).
 
 ## Versioning
 
-The signing-service is primarily intended to run as a docker image within a docker compose network, typically as part of a flow that is orchestrated by the [DCC Issuer Coordinator](https://github.com/digitalcredentials/issuer-coordinator) and the [DCC Workflow Coordinator](https://github.com/digitalcredentials/workflow-coordinator).
+The `signing-service` is primarily intended to run as a Docker image within a Docker Compose network, typically as part of a flow that is orchestrated by the [DCC Issuer Coordinator](https://github.com/digitalcredentials/issuer-coordinator) and the [DCC Workflow Coordinator](https://github.com/digitalcredentials/workflow-coordinator).
 
-For convenience we've published the images for the signing-service and the other services used by the coordinators, as well as for the coordinators themselves, to Docker Hub so that you don't have to build them locally yourself from the github repositories.
+For convenience we've published the images for the `signing-service` and the other services used by the coordinators, as well as for the coordinators themselves, to Docker Hub so that you don't have to build them locally yourself from the GitHub repositories.
 
-The images on Docker Hub will of course at times be updated to add new functionality and fix bugs. Rather than overwrite the default (`latest`) version on Docker Hub for each update, we've adopted the [Semantic Versioning Guidelines](https://semver.org) with our docker image tags.
+The images on Docker Hub will of course at times be updated to add new functionality and fix bugs. Rather than overwrite the default (`latest`) version on Docker Hub for each update, we've adopted the [Semantic Versioning Guidelines](https://semver.org) with our Docker image tags.
 
-We DO NOT provide a `latest` tag so you must provide a tag name (i.e, the version number) for the images in your docker compose file.
+We DO NOT provide a `latest` tag so you must provide a tag name (i.e, the version number) for the images in your Docker Compose file.
 
 To ensure you've got compatible versions of the services and the coordinator, the `major` number for each should match. At the time of writing, the versions for each are at 0.1.0, and the `major` number (the leftmost number) agrees across all three.
 
-If you do ever want to work from the source code in the repository and build your own images, we've tagged the commits in Github that were used to build the corresponding Docker image. So a github tag of v0.1.0 coresponds to a docker image tag of 0.1.0
+If you do ever want to work from the source code in the repository and build your own images, we've tagged the commits in GitHub that were used to build the corresponding Docker image. So a GitHub tag of v0.1.0 coresponds to a Docker image tag of 0.1.0
 
 ## Logging
 
@@ -520,33 +529,39 @@ Logging is configured with environment variables, as defined in the [Environment
 
 By default, everything is logged to the console (log level `silly`).
 
-You may set the log level for the application as whole, e.g.,
+You may set the log level for the application as a whole. For example:
 
-```LOG_LEVEL=http```
+```
+LOG_LEVEL=http
+```
 
-Which would only log messages with severity 'http' and all below it (info, warn, error).
+Which would only log messages with severity `http` and all below it (`info`, `warn`, `error`).
 
-The default is to log everything (level 'silly').
+The default is to log everything (level `silly`).
 
-You can also set the log level for console logging, e.g.,
+You can also set the log level for console logging. For example:
 
-```CONSOLE_LOG_LEVEL=debug```
+```
+CONSOLE_LOG_LEVEL=debug
+```
 
-This would log everything for severity 'debug' and lower (i.e., verbose, http, info, warn, error). This of course assumes that you've set the log level for the application as a whole to at least the same level.
+This would log everything for severity `debug` and lower (i.e., `verbose`, `http`, `info`, `warn`, `error`). This of course assumes that you've set the log level for the application as a whole to at least the same level.
 
-The default log level for the console is 'silly', which logs everything.
+The default log level for the console is `silly`, which logs everything.
 
 There are also two log files that can be enabled:
 
-* errors (only logs errors)
-* all (logs everything - all log levels)
+- errors (only logs errors)
+- all (logs everything - all log levels)
 
-Enable each log by setting an env variable for each, indicating the path to the appropriate file, like this example:
+Enable each log by setting an environment variable for each, indicating the path to the appropriate file, like this example:
 
 ```
-ALL_LOG_FILE=logs/all.log
 ERROR_LOG_FILE=logs/error.log
+ALL_LOG_FILE=logs/all.log
 ```
+
+If you don't set the path, the log is disabled.
 
 ## Development
 
@@ -554,7 +569,7 @@ ERROR_LOG_FILE=logs/error.log
 
 Clone code then cd into directory and:
 
-```
+```bash
 npm install
 npm run dev
 ```
@@ -563,11 +578,13 @@ If for whatever reason you need to run the server over https, you can set the `E
 
 ### Testing
 
-Testing uses supertest, jest, and nock to test the endpoints.  To run tests:
+Testing uses `supertest`, `mocha`, and `nock` to test the endpoints. To run tests:
 
-```npm run test```
+```bash
+npm run test
+```
 
-Because the revocation (status) system uses github to store status, calls are made out to github during issuance.  Rather than have to make these calls for every test, and possibly in cases where outgoing http calls aren't ideal, we've used [nock](https://github.com/nock/nock) to mock out the http calls to the github api, so that the actual calls needn't be made - nock instead returns our precanned replies.  Creating mocks can be time consuming, though, so we've also opted to use the recording feature of nock which allows us to run the tests in 'record' mode which will make the real calls out to Github, and record the results so they can be used for future calls.
+Note that when testing we don't actually want to make live HTTP calls to the services, so we've used Nock to intercept the HTTP calls and return precanned data.
 
 ## Contribute
 
