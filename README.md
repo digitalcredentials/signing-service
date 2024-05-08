@@ -56,7 +56,9 @@ This service supports multiple signing keys ([DIDs](https://www.w3.org/TR/did-co
 
 You may also want to take a look at the [DCC issuer-coordinator](https://github.com/digitalcredentials/issuer-coordinator), as it provides bearer token security over tenant endpoints, and combines both signing and status revocation as a single service. It also describes a model for composing DCC services within a Docker Compose network.
 
-Or if you are ready to dive right in and issue a whole batch of credentials, with csv upload, email notification for recipients, and wallet collection then check out the [DCC workflow-coordinator](https://github.com/digitalcredentials/workflow-coordinator).
+The [DCC workflow-coordinator](https://github.com/digitalcredentials/workflow-coordinator) goes a step further and adds support for directly adding credentials to a wallet like the [Learner Credential Wallet](lcw.app).
+
+Or if you are ready to dive right in and issue a whole batch of credentials, with csv upload, email notification for recipients, and wallet collection then check out the [DCC Admin Dashboard](https://github.com/digitalcredentials/admin-dashboard).
 
 ## Quick Start
 
@@ -139,6 +141,8 @@ The `test` and `testing` tenants both use this seed and corresponding [DID](http
  * did - `did:key:z6MknNQD1WHLGGraFi6zcbGevuAgkVfdyCdtZnQTGWVVvR5Q`
 
 That [DID](https://www.w3.org/TR/did-core/) for the `test` and `testing` tenants is currently registered in the [DCC Sandbox Registry](https://github.com/digitalcredentials/sandbox-registry) so that any credentials generated with that tenant will, when verified, show as having originated from the DCC test issuer.
+
+There is no effectively difference between the `test` and `testing` tenants - both are included simply for ease of use.
 
 See the [Sign a credential](#sign-a-credential) section for a working CURL example of how to sign with the `test` tenant.
 
@@ -567,13 +571,11 @@ ERROR_LOG_FILE=logs/error.log
 ## Health Check
 
 Docker has a [HEALTHCHECK](https://docs.docker.com/reference/dockerfile/#healthcheck) option for monitoring the
-state (health) of services. We've included an endpoint `GET healthz` that checks the health of the signing service (by running a test signature). 
-
-The endpoint can be directly specified in a CURL or WGET call on the HEALTHCHECK, but we also provide a [healthcheck.js](./healthcheck.js) function that can be similarly invoked by the HEALTHCHECK and which itself hits the `healthz` endpoint, but additionally provides options for both email and Slack notifications when the service is unhealthy. 
+state (health) of a container. We've included an endpoint `GET healthz` that checks the health of the signing service (by running a test signature). The endpoint can be directly specified in a CURL or WGET call on the HEALTHCHECK, but we also provide a [healthcheck.js](./healthcheck.js) function that can be similarly invoked by the HEALTHCHECK and which itself hits the `healthz` endpoint, but additionally provides options for both email and Slack notifications when the service is unhealthy. 
 
 You can see how we've configured the HEALTHCHECK in our [example compose files](https://github.com/digitalcredentials/docs/blob/main/deployment-guide/DCCDeploymentGuide.md#docker-compose-examples). Our compose files also include an example of how to use [autoheal](https://github.com/willfarrell/docker-autoheal) together with HEALTHCHECK to restart an unhealthy container.
 
-If you want notifications sent to a Slack channel, you'll have to set up a Slack `web hook` as described [here](https://api.slack.com/messaging/webhooks).
+If you want notifications sent to a Slack channel, you'll have to set up a Slack [web hook](https://api.slack.com/messaging/webhooks).
 
 If you want notifications sent to an email address, you'll need an SMTP server to which you can send emails, so something like sendgrid, mailchimp, mailgun, or even your own email account if it allows direct SMTP sends. Gmail can apparently be configured to so so.
 
