@@ -1,7 +1,7 @@
 import winston from 'winston'
 import { getConfig } from '../config.js'
 
-const { errorLogFile, logAllFile, logLevel, consoleLogLevel } = getConfig()
+const { errorLogFile, allLogFile, logLevel, consoleLogLevel } = getConfig()
 /* 
 These are the default npm logging levels
 that Winston uses, but we include them explicitly
@@ -59,10 +59,10 @@ if (errorLogFile) {
   )
 }
 
-if (logAllFile) {
+if (allLogFile) {
   transports.push(
     new winston.transports.File({
-      filename: logAllFile
+      filename: allLogFile
     })
   )
 }

@@ -78,10 +78,10 @@ There is a sample .env file provided called .env.example to help you get started
 | `PORT` | http port on which to run the express app | 4006 | no |
 | `ENABLE_HTTPS_FOR_DEV` | runs the dev server over https - ONLY FOR DEV - typically to allow CORS calls from a browser | false | no |
 | `TENANT_SEED_{TENANT_NAME}` | see [tenants](#tenants) section for instructions | no | no |
-|`TENANT_DIDMETHOD_{TENANT_NAME}` | did method (`key` or `web`) to use for signing on this tenant | `key` | no |
+|`TENANT_DID_METHOD_{TENANT_NAME}` | did method (`key` or `web`) to use for signing on this tenant | `key` | no |
 | `TENANT_DID_URL_{TENANT_NAME}` | url to use for did:web | | no |
 | `ERROR_LOG_FILE` | log file for all errors - see [Logging](#logging) | no | no |
-| `LOG_ALL_FILE` | log file for everything - see [Logging](#logging) | no | no |
+| `ALL_LOG_FILE` | log file for everything - see [Logging](#logging) | no | no |
 | `CONSOLE_LOG_LEVEL` | console log level - see [Logging](#logging) | silly | no |
 | `LOG_LEVEL` | log level for application - see [Logging](#logging) | silly | no |
 
@@ -89,7 +89,7 @@ There is a sample .env file provided called .env.example to help you get started
 
 You might want to allow more than one signing key ([DID](https://www.w3.org/TR/did-core/)) to be used with the issuer. For example, you might want to sign university/college degree diplomas with a key ([DID](https://www.w3.org/TR/did-core/)) that is only used by the registrar, but then also allow certificates for individual courses to be signed by by different keys ([DIDs](https://www.w3.org/TR/did-core/)) that are owned by the faculty or department that teaches the course.
 
-We're calling these differents signing authorities 'tenants' (or 'instances').  You can set up as many tenants as you like by including a `TENANT_SEED_{TENANT_NAME}={seed}` environment variable for every 'tenant'. (NOTE: if you are using a did:web key, you must additinally specify `TENANT_DIDMETHOD_{TENANT_NAME}=web` and `TENANT_DID_URL_{TENANT_NAME}={the url for your did:web}`) for each did:web tenant. Read more in the [did:web generator section](#didweb-generator).
+We're calling these differents signing authorities 'tenants' (or 'instances').  You can set up as many tenants as you like by including a `TENANT_SEED_{TENANT_NAME}={seed}` environment variable for every 'tenant'. (NOTE: if you are using a did:web key, you must additinally specify `TENANT_DID_METHOD_{TENANT_NAME}=web` and `TENANT_DID_URL_{TENANT_NAME}={the url for your did:web}`) for each did:web tenant. Read more in the [did:web generator section](#didweb-generator).
 
 NOTE: the `seed` is explained below in the [Signing key section](#signing-key).
 
@@ -307,7 +307,7 @@ and save that in a file called did.json at the url where you'll host the documen
 
 ```https://raw.githubusercontent.com/jchartrand/didWebTest/main/.well-known/did.json```
 
-You must also set `TENANT_DIDMETHOD_{TENANT_NAME}=web` and set `TENANT_DID_URL_{TENANT_NAME}` to the url where your `.well-known/did.json` did-document is hosted, which for this example would be:
+You must also set `TENANT_DID_METHOD_{TENANT_NAME}=web` and set `TENANT_DID_URL_{TENANT_NAME}` to the url where your `.well-known/did.json` did-document is hosted, which for this example would be:
 
 ```https://raw.githubusercontent.com/jchartrand/didWebTest/main```
 
@@ -329,7 +329,7 @@ The issuer is by default set up to use the did:key implemenation of a [DID](http
 
 The did:web implementation is preferable for production becuase it allows you to rotate (change) your signing keys whithout having to update every document that points at the old keys.
 
-To use it set `TENANT_DIDMETHOD_{TENANT_NAME}=web` and set `TENANT_DID_URL_{TENANT_NAME}` to the url where your `.well-known/did.json` did-document is hosted.
+To use it set `TENANT_DID_METHOD_{TENANT_NAME}=web` and set `TENANT_DID_URL_{TENANT_NAME}` to the url where your `.well-known/did.json` did-document is hosted.
 
 ## Usage
 
@@ -544,7 +544,7 @@ There are also two log files that can be enabled:
 Enable each log by setting an env variable for each, indicating the path to the appropriate file, like this example:
 
 ```
-LOG_ALL_FILE=logs/all.log
+ALL_LOG_FILE=logs/all.log
 ERROR_LOG_FILE=logs/error.log
 ```
 

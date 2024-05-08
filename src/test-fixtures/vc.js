@@ -2,7 +2,6 @@ const unsignedVC = {
   '@context': [
     'https://www.w3.org/2018/credentials/v1',
     'https://purl.imsglobal.org/spec/ob/v3p0/context-3.0.2.json',
-    'https://w3id.org/vc/status-list/2021/v1',
     'https://w3id.org/security/suites/ed25519-2020/v1'
   ],
   id: 'urn:uuid:951b475e-b795-43bc-ba8f-a2d01efd2eb1',
@@ -45,7 +44,7 @@ const unsignedVC = {
 // "credentialStatus":
 const credentialStatus = {
   id: 'https://digitalcredentials.github.io/credential-status-jc-test/XA5AAK1PV4#16',
-  type: 'StatusList2021Entry',
+  type: 'BitstringStatusListEntry',
   statusPurpose: 'revocation',
   statusListIndex: 16,
   statusListCredential:
@@ -70,13 +69,11 @@ const getUnsignedVCWithStatus = () => {
 }
 const ed25519_2020suiteContext =
   'https://w3id.org/security/suites/ed25519-2020/v1'
-const statusListContext = 'https://w3id.org/vc/status-list/2021/v1'
 
 export {
   getUnsignedVC,
   getUnsignedVCWithoutSuiteContext,
   getCredentialStatus,
   getUnsignedVCWithStatus,
-  ed25519_2020suiteContext,
-  statusListContext
+  ed25519_2020suiteContext
 }
