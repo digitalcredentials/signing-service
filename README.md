@@ -22,6 +22,7 @@ IMPORTANT NOTE ABOUT VERSIONING: If you are using a Docker Hub image of this rep
   - [Learner Credential Wallet](#learner-credential-wallet)
 - [Versioning](#versioning)
 - [Logging](#logging)
+- [Health Check](#health-check)
 - [Development](#development)
   - [Testing](#testing)
 - [Contribute](#contribute)
@@ -31,7 +32,7 @@ IMPORTANT NOTE ABOUT VERSIONING: If you are using a Docker Hub image of this rep
 
 Use this express server to sign [Verifiable Credentials](https://www.w3.org/TR/vc-data-model/).
 
-Implements three http endpoints:
+Implements four http endpoints:
 
  * POST /instance/:instanceId/credentials/sign
 
@@ -45,11 +46,17 @@ Which is a convenience method for generating a new signing key, encoded as a [De
 
 Which is a convenience method for generating a new signing key, encoded as a [Decentralized Identifier (DID)](https://www.w3.org/TR/did-core/), specifically using the [did:web method](https://w3c-ccg.github.io/did-method-web/). Read about how to use it in the [did:web generator section](#didweb-generator).
 
+* GET /healthz
+
+Which is an endpoint typically meant to be called by the Docker HEALTHCHECK option for a specific service. Read more below in the [Health Check](#health-check) section.
+
 The signing endpoint is meant to be called as a RESTful service from any software wanting to sign a credential, and in particular is so used by the [DCC issuer-coordinator](https://github.com/digitalcredentials/issuer-coordinator) and the  [DCC workflow-coordinator](https://github.com/digitalcredentials/worfklow-coordinator) from within a Docker Compose network.
 
-This service supports multiple signing keys ([DIDs](https://www.w3.org/TR/did-core/)), identified by the `:instanceId` in the signing endpoint's path. An `instance` is analagous to a `tenant`.
+This service supports multiple signing keys ([DIDs](https://www.w3.org/TR/did-core/)), identified by the `:instanceId` in the signing endpoint's path. An `instance` is sometimes also called a `tenant`.
 
 You may also want to take a look at the [DCC issuer-coordinator](https://github.com/digitalcredentials/issuer-coordinator), as it provides bearer token security over tenant endpoints, and combines both signing and status revocation as a single service. It also describes a model for composing DCC services within a Docker Compose network.
+
+Or if you are ready to dive right in and issue a whole batch of credentials, with csv upload, email notification for recipients, and wallet collection then check out the [DCC workflow-coordinator](https://github.com/digitalcredentials/workflow-coordinator).
 
 ## Quick Start
 
@@ -65,7 +72,7 @@ docker run -dp 4006:4006 digitalcredentials/signing-service:0.3.0
 
 You can now issue test credentials as explained in the [Sign a Credential](#sign-a-credential) section.
 
-IMPORTANT: this quick start version uses a test signing key that is not registered as belonging to an actual issuer. To use this in production you'll have to generate your own signing key, and register it publicly. To do so, read on...
+IMPORTANT: this quick start version uses a test signing key that is not registered to an actual issuer, so when verifying credentials issued with the test key they will be marked as test credentials. To use this in production you'll have to generate your own signing key, and register it publicly. To do so, read on...
 
 ## Configuration
 
@@ -84,6 +91,15 @@ There is a sample .env file provided called .env.example to help you get started
 | `LOG_ALL_FILE` | log file for everything - see [Logging](#logging) | no | no |
 | `CONSOLE_LOG_LEVEL` | console log level - see [Logging](#logging) | silly | no |
 | `LOG_LEVEL` | log level for application - see [Logging](#logging) | silly | no |
+| `HEALTH_CHECK_SMTP_HOST` | SMTP host for unhealthy notification emails - see [Health Check](#health-check) | no | no |
+| `HEALTH_CHECK_SMTP_USER` | SMTP user for unhealthy notification emails - see [Health Check](#health-check) | no | no |
+| `HEALTH_CHECK_SMTP_PASS` | SMTP password for unhealthy notification emails - see [Health Check](#health-check) | no | no |
+| `HEALTH_CHECK_EMAIL_FROM` | name of email sender for unhealthy notifications emails - see [Health Check](#health-check) | no | no |
+| `HEALTH_CHECK_EMAIL_RECIPIENT` | recipient when unhealthy - see [Health Check](#health-check) | no | no |
+| `HEALTH_CHECK_EMAIL_SUBJECT` | email subject when unhealthy - see [Health Check](#health-check) | no | no |
+| `HEALTH_CHECK_WEB_HOOK` | posted to when unhealthy - see [Health Check](#health-check) | no | no |
+| `HEALTH_CHECK_SERVICE_URL` | local url for this service - see [Health Check](#health-check) | http://SIGNER:4006/healthz | no |
+| `HEALTH_CHECK_SERVICE_NAME` | service name to use in error messages - see [Health Check](#health-check) | SIGNING-SERVICE | no |
 
 ### Tenants
 
@@ -111,17 +127,18 @@ Note that these are all unsecured calls. You can choose to implement security as
 
 #### Default Tenants
 
-There are two tenants setup by default:
+There are three tenants setup by default:
 
  * instance/test/credentials/issue
+ * instance/testing/credentials/issue
  * instance/random/credentials/issue
 
-The `test` tenant uses this seed and corresponding [DID](https://www.w3.org/TR/did-core/):
+The `test` and `testing` tenants both use this seed and corresponding [DID](https://www.w3.org/TR/did-core/):
 
  * seed - `z1AeiPT496wWmo9BG2QYXeTusgFSZPNG3T9wNeTtjrQ3rCB`
  * did - `did:key:z6MknNQD1WHLGGraFi6zcbGevuAgkVfdyCdtZnQTGWVVvR5Q`
 
-That [DID](https://www.w3.org/TR/did-core/) for the `test` tenant is currently registered in the [DCC Sandbox Registry](https://github.com/digitalcredentials/sandbox-registry) so that any credentials generated with that tenant will, when verified, show as having originated from the DCC test issuer.
+That [DID](https://www.w3.org/TR/did-core/) for the `test` and `testing` tenants is currently registered in the [DCC Sandbox Registry](https://github.com/digitalcredentials/sandbox-registry) so that any credentials generated with that tenant will, when verified, show as having originated from the DCC test issuer.
 
 See the [Sign a credential](#sign-a-credential) section for a working CURL example of how to sign with the `test` tenant.
 
@@ -211,13 +228,13 @@ curl --location 'localhost:4006/did-web-generator' \
 ```
 
 The value of 'url' property should be the url at which you will host your did:web document.
-For the url above, the document will actually need to be hosted at:
+For the url above, the document will therefore need to be hosted at:
 
 ```https://raw.githubusercontent.com/jchartrand/didWebTest/main/.well-known/did.json```
 
 But, when generating the did, leave off the '.well-known/did.json' part. That bit is assumed, according to the did:web specification.
 
-So that curl will return a document something like so:
+So, that curl command will return a document something like so:
 
 <details> 
 <summary>Show code</summary>
@@ -280,7 +297,7 @@ So that curl will return a document something like so:
 ```
 </details>
 
-Again, as with a did:key, you'll need to set the `seed` and the `did` as described in the previous section.
+Again, as with a did:key, you'll need to set the `seed` and register the `did`, as described in the prior [did:key generator](#didkey-generator) section.
 
 You will additionally need to copy the value of the didDocument property, i.e, from the example above
 
@@ -307,7 +324,7 @@ and save that in a file called did.json at the url where you'll host the documen
 
 ```https://raw.githubusercontent.com/jchartrand/didWebTest/main/.well-known/did.json```
 
-You must also set `TENANT_DIDMETHOD_{TENANT_NAME}=web` and set `TENANT_DID_URL_{TENANT_NAME}` to the url where your `.well-known/did.json` did-document is hosted, which for this example would be:
+You must also set the `TENANT_DIDMETHOD_{TENANT_NAME}=web` environment variable and set the `TENANT_DID_URL_{TENANT_NAME}` environement variable to the url where your `.well-known/did.json` did-document is hosted, which for this example would be:
 
 ```https://raw.githubusercontent.com/jchartrand/didWebTest/main```
 
@@ -343,11 +360,11 @@ You can start the script using NPM, like is done with the `start` script in pack
 
 You can directly from the DockerHub image, using a default configuration, with:
 
-  `docker run -dp 4006:4006 digitalcredentials/signing-service:0.1.0`
+  `docker run -dp 4006:4006 digitalcredentials/signing-service:0.3.0`
 
 To run it with your own configuration (like with your own signing keys):
 
-``docker run --env-file .env -dp 4006:4006 digitalcredentials/signing-service:0.1.0`
+``docker run --env-file .env -dp 4006:4006 digitalcredentials/signing-service:0.3.0`
 
 where the `.env` file contains your environment variables. See [.env.example](./.env.example).
 
@@ -477,7 +494,7 @@ This should return a fully formed and signed credential printed to the terminal,
 ```
 </details>
 
-NOTE: CURL can get a bit clunky if you want to experiment, so you might consider trying [Postman](https://www.postman.com/downloads/) which makes it very easy to construct and send http calls.
+NOTE: CURL can get a bit clunky if you want to experiment - you might consider trying [Postman](https://www.postman.com/downloads/) which makes it a bit easier to construct and send http calls.
 
 
 ### Learner Credential Wallet
@@ -498,7 +515,7 @@ The images on Docker Hub will of course at times be updated to add new functiona
 
 We DO NOT provide a `latest` tag so you must provide a tag name (i.e, the version number) for the images in your docker compose file.
 
-To ensure you've got compatible versions of the services and the coordinator, the `major` number for each should match. At the time of writing, the versions for each are at 0.1.0, and the `major` number (the leftmost number) agrees across all three.
+To ensure you've got compatible versions of the services and the coordinator, take a look at our [sample compose files](https://github.com/digitalcredentials/docs/blob/main/deployment-guide/DCCDeploymentGuide.md#docker-compose-examples).
 
 If you do ever want to work from the source code in the repository and build your own images, we've tagged the commits in Github that were used to build the corresponding Docker image. So a github tag of v0.1.0 coresponds to a docker image tag of 0.1.0
 
@@ -547,6 +564,18 @@ Enable each log by setting an env variable for each, indicating the path to the 
 LOG_ALL_FILE=logs/all.log
 ERROR_LOG_FILE=logs/error.log
 ```
+## Health Check
+
+Docker has a [HEALTHCHECK](https://docs.docker.com/reference/dockerfile/#healthcheck) option for monitoring the
+state (health) of services. We've included an endpoint `GET healthz` that checks the health of the signing service (by running a test signature). 
+
+The endpoint can be directly specified in a CURL or WGET call on the HEALTHCHECK, but we also provide a [healthcheck.js](./healthcheck.js) function that can be similarly invoked by the HEALTHCHECK and which itself hits the `healthz` endpoint, but additionally provides options for both email and Slack notifications when the service is unhealthy. 
+
+You can see how we've configured the HEALTHCHECK in our [example compose files](https://github.com/digitalcredentials/docs/blob/main/deployment-guide/DCCDeploymentGuide.md#docker-compose-examples). Our compose files also include an example of how to use [autoheal](https://github.com/willfarrell/docker-autoheal) together with HEALTHCHECK to restart an unhealthy container.
+
+If you want notifications sent to a Slack channel, you'll have to set up a Slack `web hook` as described [here](https://api.slack.com/messaging/webhooks).
+
+If you want notifications sent to an email address, you'll need an SMTP server to which you can send emails, so something like sendgrid, mailchimp, mailgun, or even your own email account if it allows direct SMTP sends. Gmail can apparently be configured to so so.
 
 ## Development
 
@@ -578,4 +607,4 @@ If editing the Readme, please conform to the
 
 ## License
 
-[MIT License](LICENSE.md) © 2023 Digital Credentials Consortium.
+[MIT License](LICENSE.md) © 2024 Digital Credentials Consortium.
