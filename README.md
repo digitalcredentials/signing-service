@@ -48,7 +48,7 @@ Which is a convenience method for generating a new signing key, encoded as a [De
 
 * GET /healthz
 
-Which is an endpoint typically meant to be called by the Docker HEALTHCHECK option for a specific service. Read more below in the [Health Check](#health-check) section.
+Which is an endpoint typically meant to be called by the Docker [HEALTHCHECK](https://docs.docker.com/reference/dockerfile/#healthcheck) option for a specific service. Read more below in the [Health Check](#health-check) section.
 
 The signing endpoint is meant to be called as a RESTful service from any software wanting to sign a credential, and in particular is so used by the [DCC issuer-coordinator](https://github.com/digitalcredentials/issuer-coordinator) and the  [DCC workflow-coordinator](https://github.com/digitalcredentials/worfklow-coordinator) from within a Docker Compose network.
 
@@ -87,8 +87,9 @@ There is a sample .env file provided called .env.example to help you get started
 | `PORT` | http port on which to run the express app | 4006 | no |
 | `ENABLE_HTTPS_FOR_DEV` | runs the dev server over https - ONLY FOR DEV - typically to allow CORS calls from a browser | false | no |
 | `TENANT_SEED_{TENANT_NAME}` | see [tenants](#tenants) section for instructions | no | no |
-|`TENANT_DIDMETHOD_{TENANT_NAME}` | did method (`key` or `web`) to use for signing on this tenant | `key` | no |
+| `TENANT_DIDMETHOD_{TENANT_NAME}` | did method (`key` or `web`) to use for signing on this tenant | `key` | no |
 | `TENANT_DID_URL_{TENANT_NAME}` | url to use for did:web | | no |
+| `ENABLE_ACCESS_LOGGING` | log all http calls to the service - see [Logging](#logging) | true | no |
 | `ERROR_LOG_FILE` | log file for all errors - see [Logging](#logging) | no | no |
 | `LOG_ALL_FILE` | log file for everything - see [Logging](#logging) | no | no |
 | `CONSOLE_LOG_LEVEL` | console log level - see [Logging](#logging) | silly | no |
@@ -540,6 +541,10 @@ We support the following log levels:
 Logging is configured with environment variables, as defined in the [Environment Variables](#environment-variables) section.
 
 By default, everything is logged to the console (log level `silly`).
+
+All http calls to the service are logged by default, which might bloat the log. You can disable access logging with:
+
+```ENABLE_ACCESS_LOGGING=false```
 
 You may set the log level for the application as whole, e.g.,
 

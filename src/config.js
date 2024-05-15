@@ -57,13 +57,14 @@ async function parseTenantSeeds() {
 function parseConfig() {
   const env = process.env
   const config = Object.freeze({
+    port: env.PORT ? parseInt(env.PORT) : defaultPort,
     enableHttpsForDev: env.ENABLE_HTTPS_FOR_DEV?.toLowerCase() === 'true',
+    enableAccessLogging: env.ENABLE_ACCESS_LOGGING?.toLowerCase() === 'true',
     consoleLogLevel:
       env.CONSOLE_LOG_LEVEL?.toLocaleLowerCase() || defaultConsoleLogLevel,
     logLevel: env.LOG_LEVEL?.toLocaleLowerCase() || defaultLogLevel,
     errorLogFile: env.ERROR_LOG_FILE,
-    logAllFile: env.LOG_ALL_FILE,
-    port: env.PORT ? parseInt(env.PORT) : defaultPort
+    logAllFile: env.LOG_ALL_FILE
   })
   return config
 }
