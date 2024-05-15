@@ -10,7 +10,8 @@
     "lint-fix": "eslint --fix .  --ext .js",
     "test": "NODE_OPTIONS=--experimental-vm-modules npx c8 mocha --timeout 10000 -r dotenv/config dotenv_config_path=src/test-fixtures/.env.testing src/*.test.js",
     "coveralls": "npm run test; c8 report --reporter=text-lcov | coveralls",
-    "prepare": "test -d node_modules/husky && husky install || echo \"husky is not installed\""
+    "prepare": "test -d node_modules/husky && husky install || echo \"husky is not installed\"",
+    "test:health": "node -r dotenv/config healthcheck.js dotenv_config_path=./.env.healthcheck.testing "
   },
   "dependencies": {
     "@digitalcredentials/bnid": "^2.1.2",
@@ -28,6 +29,7 @@
     "dotenv": "^16.0.3",
     "express": "~4.16.1",
     "morgan": "~1.9.1",
+    "nodemailer": "^6.9.13",
     "winston": "^3.10.0"
   },
   "devDependencies": {
