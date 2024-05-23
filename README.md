@@ -31,13 +31,13 @@ IMPORTANT NOTE ABOUT VERSIONING: If you are using a Docker Hub image of this rep
 
 ## Summary
 
-Use this express server to sign [Verifiable Credentials](https://www.w3.org/TR/vc-data-model/).
+Use this express server to sign [Verifiable Credentials](https://www.w3.org/TR/vc-data-model-2.0/).
 
 Implements three HTTP endpoints:
 
  * `POST /instance/:instanceId/credentials/sign`
 
-This endpoint signs and returns a [Verifiable Credential](https://www.w3.org/TR/vc-data-model/) that has been posted to it.
+This endpoint signs and returns a [Verifiable Credential](https://www.w3.org/TR/vc-data-model-2.0/) that has been posted to it.
 
  * `GET /did-key-generator`
 
