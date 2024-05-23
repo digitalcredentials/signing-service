@@ -39,8 +39,8 @@ async function parseTenantSeeds() {
     DID_SEEDS[tenantName] = {
       didSeed: await decodeSeed(value),
       didMethod:
-        process.env[`TENANT_DIDMETHOD_${tenant}`] &&
-        process.env[`TENANT_DIDMETHOD_${tenant}`].toLowerCase() === 'web'
+        process.env[`TENANT_DID_METHOD_${tenant}`] &&
+        process.env[`TENANT_DID_METHOD_${tenant}`].toLowerCase() === 'web'
           ? 'web'
           : 'key',
       didUrl: process.env[`TENANT_DID_URL_${tenant}`]
@@ -56,7 +56,7 @@ function parseConfig() {
       env.CONSOLE_LOG_LEVEL?.toLocaleLowerCase() || defaultConsoleLogLevel,
     logLevel: env.LOG_LEVEL?.toLocaleLowerCase() || defaultLogLevel,
     errorLogFile: env.ERROR_LOG_FILE,
-    logAllFile: env.LOG_ALL_FILE,
+    allLogFile: env.ALL_LOG_FILE,
     port: env.PORT ? parseInt(env.PORT) : defaultPort
   })
   return config

@@ -152,13 +152,13 @@ describe('api', () => {
       resetConfig()
       process.env[`TENANT_SEED_${tenantName}`] =
         'z1AeiPT496wWmo9BG2QYXeTusgFSZPNG3T9wNeTtjrQ3rCB'
-      process.env[`TENANT_DIDMETHOD_${tenantName}`] = 'web'
+      process.env[`TENANT_DID_METHOD_${tenantName}`] = 'web'
       process.env[`TENANT_DID_URL_${tenantName}`] = 'https://example.com'
     })
 
     after(() => {
       delete process.env[`TENANT_SEED_${tenantName}`]
-      delete process.env[`TENANT_DIDMETHOD_${tenantName}`]
+      delete process.env[`TENANT_DID_METHOD_${tenantName}`]
       delete process.env[`TENANT_DID_URL_${tenantName}`]
     })
 

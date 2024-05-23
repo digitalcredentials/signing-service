@@ -11,7 +11,7 @@ describe('Config', () => {
   beforeEach(async () => {
     resetConfig()
     delete process.env[`TENANT_SEED_${tenantName}`]
-    delete process.env[`TENANT_DIDMETHOD_${tenantName}`]
+    delete process.env[`TENANT_DID_METHOD_${tenantName}`]
   })
 
   afterEach(async () => {})
@@ -27,7 +27,7 @@ describe('Config', () => {
     it('uses DID:key when requested', async () => {
       process.env[`TENANT_SEED_${tenantName}`] =
         'z1AeiPT496wWmo9BG2QYXeTusgFSZPNG3T9wNeTtjrQ3rCB'
-      process.env[`TENANT_DIDMETHOD_${tenantName}`] = 'key'
+      process.env[`TENANT_DID_METHOD_${tenantName}`] = 'key'
       const seed = await getTenantSeed('configtest')
       expect(seed.didMethod).to.eql('key')
     })
@@ -35,7 +35,7 @@ describe('Config', () => {
     it('uses DID:web when requested', async () => {
       process.env[`TENANT_SEED_${tenantName}`] =
         'z1AeiPT496wWmo9BG2QYXeTusgFSZPNG3T9wNeTtjrQ3rCB'
-      process.env[`TENANT_DIDMETHOD_${tenantName}`] = 'web'
+      process.env[`TENANT_DID_METHOD_${tenantName}`] = 'web'
       const seed = await getTenantSeed('configtest')
       expect(seed.didMethod).to.eql('web')
     })
