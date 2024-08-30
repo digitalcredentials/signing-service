@@ -4,7 +4,7 @@
 .husky
 coverage
 logs
-node_modules
+# node_modules
 .dockerignore
 .editorconfig
 .eslintrc.cjs
