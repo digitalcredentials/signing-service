@@ -1,5 +1,13 @@
 # signing-service Changelog
 
+## 0.4.0 - 2024-08-30
+### Changed
+- switch all libs to most recent versions of digitalbazaar, rather than digitalcredentials
+- fix incompatabilities with newer digitalbazaar libs
+- move IssuerInstance class directly into this repo from former npm package
+- update tests
+- add healthcheck.js for use with docker HEALTHCHECK
+
 ## 0.3.0 - 2024-04-22
 ### Changed
 - add healthz endpoint for use with docker HEALTHCHECK
