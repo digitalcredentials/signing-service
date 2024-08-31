@@ -13,9 +13,10 @@ import {
 import {
   ed25519_2020suiteContext,
   getCredentialStatus,
+  getCredentialStatusBitString,
   getUnsignedVC,
-  getUnsignedVCv2,
   getUnsignedVCWithStatus,
+  getUnsignedVC2WithStatus,
   getUnsignedVCWithoutSuiteContext
 } from './test-fixtures/vc.js'
 
@@ -90,7 +91,7 @@ describe('api', () => {
     })
 
     it('returns the submitted vc version 2, signed with test key', async () => {
-      const sentCred = getUnsignedVCv2()
+      const sentCred = getUnsignedVC2WithStatus()
       const response = await request(app)
         .post('/instance/testing/credentials/sign')
         .send(sentCred)
@@ -155,7 +156,19 @@ describe('api', () => {
       expect(response.status).to.eql(200)
       expect(response.body.credentialStatus).to.eql(statusBeforeSigning)
     })
+
+    it('leaves an existing bitstring credential status as-is with v2', async () => {
+      const statusBeforeSigning = getCredentialStatusBitString()
+      const response = await request(app)
+        .post('/instance/testing/credentials/sign')
+        .send(getUnsignedVC2WithStatus())
+
+      expect(response.header['content-type']).to.have.string('json')
+      expect(response.status).to.eql(200)
+      expect(response.body.credentialStatus).to.eql(statusBeforeSigning)
+    })
   })
+
   describe('DID:web', () => {
     const tenantName = 'apptest'
 

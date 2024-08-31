@@ -1,7 +1,7 @@
 const usignedVCv2 = {
   '@context': [
     'https://www.w3.org/ns/credentials/v2',
-    'https://purl.imsglobal.org/spec/ob/v3p0/context-3.0.2.json',
+    'https://purl.imsglobal.org/spec/ob/v3p0/context-3.0.3.json',
     'https://w3id.org/security/suites/ed25519-2020/v1'
   ],
   id: 'urn:uuid:2fe53dc9-b2ec-4939-9b2c-0d00f6663b6c',
@@ -41,7 +41,7 @@ const usignedVCv2 = {
 const unsignedVC = {
   '@context': [
     'https://www.w3.org/2018/credentials/v1',
-    'https://purl.imsglobal.org/spec/ob/v3p0/context-3.0.2.json',
+    'https://purl.imsglobal.org/spec/ob/v3p0/context-3.0.3.json',
     'https://w3id.org/vc/status-list/2021/v1',
     'https://w3id.org/security/suites/ed25519-2020/v1'
   ],
@@ -89,7 +89,17 @@ const credentialStatus = {
     'https://digitalcredentials.github.io/credential-status-jc-test/XA5AAK1PV4'
 }
 
+const credentialStatusBitString = {
+  id: 'https://digitalcredentials.github.io/credential-status-jc-test/XA5AAK1PV4#16',
+  type: 'BitstringStatusListEntry',
+  statusPurpose: 'revocation',
+  statusListIndex: 16,
+  statusListCredential:
+    'https://digitalcredentials.github.io/credential-status-jc-test/XA5AAK1PV4'
+}
+
 const getUnsignedVC = () => JSON.parse(JSON.stringify(unsignedVC))
+
 const getUnsignedVCv2 = () => JSON.parse(JSON.stringify(usignedVCv2))
 
 const getUnsignedVCWithoutSuiteContext = () => {
@@ -101,22 +111,30 @@ const getUnsignedVCWithoutSuiteContext = () => {
   return vcCopy
 }
 const getCredentialStatus = () => JSON.parse(JSON.stringify(credentialStatus))
+const getCredentialStatusBitString = () =>
+  JSON.parse(JSON.stringify(credentialStatusBitString))
 
 const getUnsignedVCWithStatus = () => {
   const unsignedVCWithStatus = getUnsignedVC()
   unsignedVCWithStatus.credentialStatus = getCredentialStatus()
   return unsignedVCWithStatus
 }
+
+const getUnsignedVC2WithStatus = () => {
+  const unsignedVC2WithStatus = getUnsignedVCv2()
+  unsignedVC2WithStatus.credentialStatus = getCredentialStatusBitString()
+  return unsignedVC2WithStatus
+}
+
 const ed25519_2020suiteContext =
   'https://w3id.org/security/suites/ed25519-2020/v1'
-const statusListContext = 'https://w3id.org/vc/status-list/2021/v1'
 
 export {
   getUnsignedVC,
-  getUnsignedVCv2,
   getUnsignedVCWithoutSuiteContext,
   getCredentialStatus,
+  getCredentialStatusBitString,
   getUnsignedVCWithStatus,
-  ed25519_2020suiteContext,
-  statusListContext
+  getUnsignedVC2WithStatus,
+  ed25519_2020suiteContext
 }
