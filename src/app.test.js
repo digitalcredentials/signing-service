@@ -14,6 +14,7 @@ import {
   ed25519_2020suiteContext,
   getCredentialStatus,
   getUnsignedVC,
+  getUnsignedVCv2,
   getUnsignedVCWithStatus,
   getUnsignedVCWithoutSuiteContext
 } from './test-fixtures/vc.js'
@@ -86,6 +87,24 @@ describe('api', () => {
 
       expect(response.header['content-type']).to.have.string('json')
       expect(response.status).to.eql(404)
+    })
+
+    it('returns the submitted vc version 2, signed with test key', async () => {
+      const sentCred = getUnsignedVCv2()
+      const response = await request(app)
+        .post('/instance/testing/credentials/sign')
+        .send(sentCred)
+
+      expect(response.header['content-type']).to.have.string('json')
+      expect(response.status).to.eql(200)
+
+      const returnedCred = JSON.parse(JSON.stringify(response.body))
+      const proof = returnedCred.proof
+      delete returnedCred.proof
+      sentCred.issuer.id = signingDID
+      expect(sentCred).to.eql(returnedCred)
+      expect(proof.type).to.eql('Ed25519Signature2020')
+      expect(proof.verificationMethod).to.eql(verificationMethod)
     })
 
     it('returns the submitted vc, signed with test key', async () => {
