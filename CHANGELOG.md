@@ -1,11 +1,11 @@
 # signing-service Changelog
 
-## 0.4.0 - 2024-08-30
+## 0.4.0 - 2024-09-01
 ### Changed
 - switch all libs to most recent versions of digitalbazaar, rather than digitalcredentials
 - fix incompatabilities with newer digitalbazaar libs
 - move IssuerInstance class directly into this repo from former npm package
-- update tests
+- update tests to include VC2 and bistring status list
 - add healthcheck.js for use with docker HEALTHCHECK
 
 ## 0.3.0 - 2024-04-22
