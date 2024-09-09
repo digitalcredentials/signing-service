@@ -69,15 +69,6 @@ export async function build() {
     }
   })
 
-  app.get('/seedgen', async (req, res, next) => {
-    try {
-      const newSeed = await generateSeed({})
-      res.json(newSeed)
-    } catch (e) {
-      next(e)
-    }
-  })
-
   app.post('/did-web-generator', async (req, res, next) => {
     try {
       const { url } = req.body

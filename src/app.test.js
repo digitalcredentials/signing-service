@@ -233,20 +233,6 @@ describe('api', () => {
     })
   })
 
-  describe('/did-key-generator', () => {
-    it('returns a new did:key', async () => {
-      await request(app)
-        .get(`/seedgen`)
-        .expect('Content-Type', /json/)
-        .expect((res) => {
-          expect(res.body.seed).to.exist
-          expect(res.body.didDocument.id).to.contain('did:key')
-          expect(res.body.did).to.contain('did:key')
-        })
-        .expect(200)
-    })
-  })
-
   describe('/healthz', () => {
     it('returns 200 when healthy', async () => {
       await request(app)
