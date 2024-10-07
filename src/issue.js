@@ -44,13 +44,24 @@ const getIssuerInstance = async (instanceId) => {
   return ISSUER_INSTANCES[instanceId]
 }
 
-const issue = async (unsignedVerifiableCredential, issuerId) => {
-  const { issuerInstance, didDocument } = await getIssuerInstance(issuerId)
-  unsignedVerifiableCredential.issuer.id = didDocument.id
-  const signedCredential = await issuerInstance.issueCredential({
+const issue = async (unsignedVerifiableCredential, instanceId) => {
+  const {
+    issuerInstance,
+    didDocument: { id: issuerId }
+  } = await getIssuerInstance(instanceId)
+  addIssuerId(unsignedVerifiableCredential, issuerId)
+  const signedVerifiableCredential = await issuerInstance.issueCredential({
     credential: unsignedVerifiableCredential
   })
-  return signedCredential
+  return signedVerifiableCredential
+}
+
+const addIssuerId = (vc, issuerId) => {
+  if (vc.issuer && typeof vc.issuer === 'string') {
+    vc.issuer = issuerId
+  } else {
+    ;(vc.issuer ??= {}).id = issuerId
+  }
 }
 
 const buildIssuerInstance = async (seed, method, url) => {
