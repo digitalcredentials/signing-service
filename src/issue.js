@@ -56,11 +56,11 @@ const issue = async (unsignedVerifiableCredential, instanceId) => {
   return signedVerifiableCredential
 }
 
-const addIssuerId = (vc, issuerId) => {
-  if (vc.issuer && typeof vc.issuer === 'string') {
-    vc.issuer = issuerId
+const addIssuerId = (credential, issuerId) => {
+  if (credential.issuer && typeof credential.issuer === 'string') {
+    credential.issuer = issuerId
   } else {
-    ;(vc.issuer ??= {}).id = issuerId
+    ;(credential.issuer ??= {}).id = issuerId
   }
 }
 
