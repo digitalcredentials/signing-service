@@ -2,7 +2,7 @@
 
 [![Build status](https://img.shields.io/github/actions/workflow/status/digitalcredentials/signing-service/main.yml?branch=main)](https://github.com/digitalcredentials/signing-service/actions?query=workflow%3A%22Node.js+CI%22)
 
-IMPORTANT NOTE ABOUT VERSIONING: If you are using a Docker Hub image of this repository, make sure you are reading the version of this README that corresponds to your Docker Hub version.  If, for example, you are using the image `digitalcredentials/status-service:0.1.0` then you'll want to use the corresponding tagged repo: [https://github.com/digitalcredentials/status-service/tree/v0.1.0](https://github.com/digitalcredentials/status-service/tree/v0.1.0). If you are new here, then just read on...
+IMPORTANT NOTE ABOUT VERSIONING: If you are using a Docker Hub image of this repository, make sure you are reading the version of this README that corresponds to your Docker Hub version.  If, for example, you are using the image `digitalcredentials/status-service:1.0.0` then you'll want to use the corresponding tagged repo: [https://github.com/digitalcredentials/status-service/tree/v1.0.0](https://github.com/digitalcredentials/status-service/tree/v0.1.0). If you are new here, then just read on...
 
 ## Table of Contents
 
@@ -30,7 +30,7 @@ IMPORTANT NOTE ABOUT VERSIONING: If you are using a Docker Hub image of this rep
 
 ## Summary
 
-Use this express server to sign [Verifiable Credentials](https://www.w3.org/TR/vc-data-model/).
+Use this express server to sign [Verifiable Credentials](https://www.w3.org/TR/vc-data-model/). NEW: as of version 1.0.0 the signing-service works with both version 1 and version 2 Verifiable Credentials.
 
 Implements four http endpoints:
 
@@ -69,7 +69,7 @@ You can try this signing-service in about three minutes:
 2. From a terminal prompt, run:
 
 ```
-docker run -dp 4006:4006 digitalcredentials/signing-service:0.3.0
+docker run -dp 4006:4006 digitalcredentials/signing-service:1.0.0
 ```
 
 You can now issue test credentials as explained in the [Sign a Credential](#sign-a-credential) section.
