@@ -57,10 +57,25 @@ const issue = async (unsignedVerifiableCredential, instanceId) => {
 }
 
 const addIssuerId = (credential, issuerId) => {
-  if (credential.issuer && typeof credential.issuer === 'string') {
+  if (!credential.issuer) {
+    throw new SigningException(
+      420,
+      'An issuer property, either string or object, must be present.'
+    )
+  } else if (Array.isArray(credential.issuer)) {
+    throw new SigningException(
+      420,
+      'An issuer property cannot be an Array, only a string or object.'
+    )
+  } else if (typeof credential.issuer === 'string') {
     credential.issuer = issuerId
+  } else if (typeof credential.issuer === 'object') {
+    credential.issuer.id = issuerId
   } else {
-    ;(credential.issuer ??= {}).id = issuerId
+    throw new SigningException(
+      420,
+      'The issuer property must be either a string or an object.'
+    )
   }
 }
 
