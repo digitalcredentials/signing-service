@@ -44,13 +44,39 @@ const getIssuerInstance = async (instanceId) => {
   return ISSUER_INSTANCES[instanceId]
 }
 
-const issue = async (unsignedVerifiableCredential, issuerId) => {
-  const { issuerInstance, didDocument } = await getIssuerInstance(issuerId)
-  unsignedVerifiableCredential.issuer.id = didDocument.id
-  const signedCredential = await issuerInstance.issueCredential({
+const issue = async (unsignedVerifiableCredential, instanceId) => {
+  const {
+    issuerInstance,
+    didDocument: { id: issuerId }
+  } = await getIssuerInstance(instanceId)
+  addIssuerId(unsignedVerifiableCredential, issuerId)
+  const signedVerifiableCredential = await issuerInstance.issueCredential({
     credential: unsignedVerifiableCredential
   })
-  return signedCredential
+  return signedVerifiableCredential
+}
+
+const addIssuerId = (credential, issuerId) => {
+  if (!credential.issuer) {
+    throw new SigningException(
+      420,
+      'An issuer property, either string or object, must be present.'
+    )
+  } else if (Array.isArray(credential.issuer)) {
+    throw new SigningException(
+      420,
+      'An issuer property cannot be an Array, only a string or object.'
+    )
+  } else if (typeof credential.issuer === 'string') {
+    credential.issuer = issuerId
+  } else if (typeof credential.issuer === 'object') {
+    credential.issuer.id = issuerId
+  } else {
+    throw new SigningException(
+      420,
+      'The issuer property must be either a string or an object.'
+    )
+  }
 }
 
 const buildIssuerInstance = async (seed, method, url) => {
