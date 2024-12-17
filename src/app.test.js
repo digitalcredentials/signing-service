@@ -1,5 +1,5 @@
 import { driver } from '@digitalbazaar/did-method-key'
-import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020'
+import * as Ed25519Multikey from '@digitalbazaar/ed25519-multikey'
 import decodeSeed from './utils/decodeSeed.js'
 import { expect } from 'chai'
 import request from 'supertest'
@@ -25,7 +25,7 @@ import { build } from './app.js'
 const didKeyDriver = driver()
 didKeyDriver.use({
   multibaseMultikeyHeader: 'z6Mk',
-  fromMultibase: Ed25519VerificationKey2020.from
+  fromMultibase: Ed25519Multikey.from
 })
 
 let testDIDSeed
@@ -37,7 +37,7 @@ let app
 describe('api', () => {
   before(async () => {
     testDIDSeed = await decodeSeed(process.env.TENANT_SEED_TESTING)
-    const verificationKeyPair = await Ed25519VerificationKey2020.generate({
+    const verificationKeyPair = await Ed25519Multikey.generate({
       seed: testDIDSeed
     })
     ;({ didDocument } = await didKeyDriver.fromKeyPair({ verificationKeyPair }))
