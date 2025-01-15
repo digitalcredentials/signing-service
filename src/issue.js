@@ -50,16 +50,26 @@ const getIssuerInstance = async (instanceId, suite) => {
   return ISSUER_INSTANCES[suite][instanceId]
 }
 
-const issue = async (unsignedVerifiableCredential, instanceId, suite) => {
-  const {
-    issuerInstance,
-    didDocument: { id: issuerId }
-  } = await getIssuerInstance(instanceId, suite)
-  addIssuerId(unsignedVerifiableCredential, issuerId)
-  const signedVerifiableCredential = await issuerInstance.issueCredential({
-    credential: unsignedVerifiableCredential
-  })
-  return signedVerifiableCredential
+const issue = async (unsignedVerifiableCredential, instanceId, suiteList) => {
+  let credential = unsignedVerifiableCredential
+  let issuerIdAdded = false
+
+  for (const signingSuite of suiteList) {
+    const {
+      issuerInstance,
+      didDocument: { id: issuerId }
+    } = await getIssuerInstance(instanceId, signingSuite)
+
+    if (!issuerIdAdded) {
+      addIssuerId(credential, issuerId)
+      issuerIdAdded = true
+    }
+
+    credential = await issuerInstance.issueCredential({
+      credential
+    })
+  }
+  return credential
 }
 
 const addIssuerId = (credential, issuerId) => {
