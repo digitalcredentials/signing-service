@@ -44,6 +44,7 @@ export async function build() {
 
   app.post('/instance/:instanceId/credentials/sign', async (req, res, next) => {
     try {
+      var suite = req.query.suite ?? 'ed25519'
       const instanceId = req.params.instanceId //the issuer instance/tenant with which to sign
       const unSignedVC = req.body
       if (!req.body || !Object.keys(req.body).length) {
@@ -52,7 +53,7 @@ export async function build() {
           'A verifiable credential must be provided in the body.'
         )
       }
-      const signedVC = await issue(unSignedVC, instanceId)
+      const signedVC = await issue(unSignedVC, instanceId, suite)
       return res.json(signedVC)
     } catch (e) {
       // catch the async errors and pass them to the error logger and handler
