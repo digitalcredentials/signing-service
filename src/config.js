@@ -32,8 +32,7 @@ async function parseTenantSeeds() {
   DID_SEEDS[DID_WEB_TEST_TENANT_NAME] = {
     didSeed: await decodeSeed(testSeed),
     didMethod: 'web',
-    didUrl:
-      'https://raw.githubusercontent.com/digitalcredentials/signing-service/refs/heads/jc-add-eddsa-2022/src/test-fixtures/did'
+    didUrl: 'https://digitalcredentials.github.io/dcc-did-web'
   }
   // and add in a random test key
   const randomSeed = { didSeed: await generateSecretKeySeed() }
