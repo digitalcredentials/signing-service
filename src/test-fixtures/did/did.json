@@ -9,7 +9,7 @@
         {
             "id": "did:web:raw.githubusercontent.com:digitalcredentials:signing-service:refs:heads:jc-add-eddsa-2022:src:test-fixtures:did#z6MkfGZKFTyxiH9HgFUHbPQigEWh8PtFaRkESt9oQLiTvhVq",
             "type": "Ed25519VerificationKey2020",
-            "controller": "did:web:raw.githubusercontent.com:jchartrand:didWebTest:main",
+            "controller": "did:web:raw.githubusercontent.com:digitalcredentials:signing-service:refs:heads:jc-add-eddsa-2022:src:test-fixtures:did",
             "publicKeyMultibase": "z6MkfGZKFTyxiH9HgFUHbPQigEWh8PtFaRkESt9oQLiTvhVq"
         }
     ]
