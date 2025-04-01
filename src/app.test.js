@@ -210,6 +210,19 @@ describe('api', () => {
         .expect(200)
     })
 
+    it('adds ed25519 proof on demand', async () => {
+      await request(app)
+        .post(`/instance/${tenantName}/credentials/sign?suite=ed25519`)
+        .send(getUnsignedVCWithStatus())
+        .expect('Content-Type', /json/)
+        .expect((res) => {
+          expect(res.body.issuer.id).to.eql('did:web:example.com')
+          expect(res.body.proof.cryptosuite).not.to.exist
+          expect(res.body.proof.type === 'Ed25519Signature2020')
+        })
+        .expect(200)
+    })
+
     it('adds both ed25519 and eddsa proofs', async () => {
       await request(app)
         .post(
