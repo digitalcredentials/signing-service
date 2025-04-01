@@ -9,7 +9,15 @@ const defaultLogLevel = 'silly'
 const testSeed = 'z1AeiPT496wWmo9BG2QYXeTusgFSZPNG3T9wNeTtjrQ3rCB'
 export const TEST_TENANT_NAME = 'testing'
 export const SECOND_TEST_TENANT_NAME = 'test'
+
 export const DID_WEB_TEST_TENANT_NAME = 'did-web-test'
+export const DID_WEB_TEST_URL =
+  'https://digitalcredentials.github.io/dcc-did-web'
+
+export const DID_WEB__MULTIKEY_TEST_TENANT_NAME = 'did-web-multikey-test'
+export const DID_WEB__MULTIKEY_URL =
+  'https://digitalcredentials.github.io/dcc-did-web/multikey'
+
 const randomTenantName = 'random'
 let DID_SEEDS = {}
 
@@ -32,8 +40,15 @@ async function parseTenantSeeds() {
   DID_SEEDS[DID_WEB_TEST_TENANT_NAME] = {
     didSeed: await decodeSeed(testSeed),
     didMethod: 'web',
-    didUrl: 'https://digitalcredentials.github.io/dcc-did-web'
+    didUrl: DID_WEB_TEST_URL
   }
+  // and add a test tenant for did:web with a multikey verification method
+  DID_SEEDS[DID_WEB__MULTIKEY_TEST_TENANT_NAME] = {
+    didSeed: await decodeSeed(testSeed),
+    didMethod: 'web',
+    didUrl: DID_WEB__MULTIKEY_URL
+  }
+
   // and add in a random test key
   const randomSeed = { didSeed: await generateSecretKeySeed() }
   DID_SEEDS[randomTenantName] = await decodeSeed(randomSeed.didSeed)
