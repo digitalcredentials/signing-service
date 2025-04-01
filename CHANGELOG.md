@@ -1,5 +1,11 @@
 # signing-service Changelog
 
+## 1.1.0 - 2025-04-01
+
+### Added
+- add query param option to sign with eddsa data integrity suite or ed25519 signature suite
+- add option to sign with both eddsa and ed25519, i.e, add two proofs
+
 ## 1.0.0 - 2024-10-09
 
 ### Changed
