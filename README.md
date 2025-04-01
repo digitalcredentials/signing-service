@@ -2,7 +2,7 @@
 
 [![Build status](https://img.shields.io/github/actions/workflow/status/digitalcredentials/signing-service/main.yml?branch=main)](https://github.com/digitalcredentials/signing-service/actions?query=workflow%3A%22Node.js+CI%22)
 
-IMPORTANT NOTE ABOUT VERSIONING: If you are using a Docker Hub image of this repository, make sure you are reading the version of this README that corresponds to your Docker Hub version.  If, for example, you are using the image `digitalcredentials/status-service:1.0.0` then you'll want to use the corresponding tagged repo: [https://github.com/digitalcredentials/status-service/tree/v1.0.0](https://github.com/digitalcredentials/status-service/tree/v0.1.0). If you are new here, then just read on...
+IMPORTANT NOTE ABOUT VERSIONING: If you are using a Docker Hub image of this repository, make sure you are reading the version of this README that corresponds to your Docker Hub version.  If, for example, you are using the image `digitalcredentials/status-service:1.1.0` then you'll want to use the corresponding tagged repo: [https://github.com/digitalcredentials/status-service/tree/v1.1.0](https://github.com/digitalcredentials/status-service/tree/v0.1.0). If you are new here, then just read on...
 
 ## Table of Contents
 
@@ -30,11 +30,14 @@ IMPORTANT NOTE ABOUT VERSIONING: If you are using a Docker Hub image of this rep
 
 ## Summary
 
-Use this express server to sign [Verifiable Credentials](https://www.w3.org/TR/vc-data-model/). NEW: as of version 1.0.0 the signing-service works with both version 1 and version 2 Verifiable Credentials.
+Use this express server to sign [Verifiable Credentials](https://www.w3.org/TR/vc-data-model/). 
+
+NEW: as of version 1.0.0 the signing-service works with both version 1 and version 2 Verifiable Credentials.
+NEWER: as of version 1.1.0, a new 'suite' query parameter instructs the signing-service to attach proofs with type of either Ed25519SignatureSuite or DataIntegrity (with an Eddsa cryptosuite) - or both!
 
 Implements four http endpoints:
 
- * POST /instance/:instanceId/credentials/sign
+ * POST /instance/:instanceId/credentials/sign?suite=eddsa2022|ed25519 (default is ed25519)
 
 Which signs and returns a [Verifiable Credential](https://www.w3.org/TR/vc-data-model/) that has been posted to it.
 
@@ -69,7 +72,7 @@ You can try this signing-service in about three minutes:
 2. From a terminal prompt, run:
 
 ```
-docker run -dp 4006:4006 digitalcredentials/signing-service:1.0.0
+docker run -dp 4006:4006 digitalcredentials/signing-service:1.1.0
 ```
 
 You can now issue test credentials as explained in the [Sign a Credential](#sign-a-credential) section.
@@ -136,6 +139,7 @@ There are four tenants setup by default:
  * instance/testing/credentials/issue
  * instance/random/credentials/issue
  * instance/did-web-test/credentials/issue
+ * instance/did-web-multikey-test/credentials/issue
 
 The `test` and `testing` tenants both use this seed and corresponding [DID](https://www.w3.org/TR/did-core/):
 
@@ -146,9 +150,13 @@ The `did-web-test` tenant also uses the same seed as `test` and `testing`, but w
 
 * did - `did:web:digitalcredentials.github.io:dcc-did-web`
 
-The did document for the `did-web-test` tenant, which is a did:web did, is therefore hosted here:
+The did document for the `did-web-test` tenant, which is a did:web did, is hosted here:
 
 [https://digitalcredentials.github.io/dcc-did-web/did.json](https://digitalcredentials.github.io/dcc-did-web/did.json)
+
+The did document for the `did-web-multikey-test` tenant, which is a did:web did whose verification method is of type 'multikey', is hosted here:
+
+[https://digitalcredentials.github.io/dcc-did-web/multikey/did.json](https://digitalcredentials.github.io/dcc-did-web/multikey/did.json)
 
 The [DID](https://www.w3.org/TR/did-core/) for the `test`, `testing` tenants, as well the did for the `did-web-test` tenant, are currently registered in the [DCC Sandbox Registry](https://github.com/digitalcredentials/sandbox-registry) so that any credentials generated with those tenants will, when verified, show as having originated from the DCC test issuer.
 
