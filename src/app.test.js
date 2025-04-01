@@ -196,6 +196,31 @@ describe('api', () => {
         )
         .expect(200)
     })
+
+    it('adds both ed25519 and eddsa proofs', async () => {
+      await request(app)
+        .post(
+          `/instance/${tenantName}/credentials/sign?suite=ed25519&suite=eddsa2022`
+        )
+        .send(getUnsignedVCWithStatus())
+        .expect('Content-Type', /json/)
+        .expect((res) => {
+          console.log(res.body.proof)
+          expect(res.body.issuer.id).to.eql('did:web:example.com')
+          expect(res.body.proof.length).to.eql(2)
+          expect(
+            res.body.proof.filter(
+              (proof) => proof.type === 'Ed25519Signature2020'
+            ).length
+          ).to.eql(1)
+          expect(
+            res.body.proof.filter(
+              (proof) => proof.type === 'DataIntegrityProof'
+            ).length
+          ).to.eql(1)
+        })
+        .expect(200)
+    })
   })
 
   describe('/did-web-generator', () => {
