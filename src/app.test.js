@@ -197,6 +197,19 @@ describe('api', () => {
         .expect(200)
     })
 
+    it('adds eddsa proof on demand', async () => {
+      await request(app)
+        .post(`/instance/${tenantName}/credentials/sign?suite=eddsa2022`)
+        .send(getUnsignedVCWithStatus())
+        .expect('Content-Type', /json/)
+        .expect((res) => {
+          expect(res.body.issuer.id).to.eql('did:web:example.com')
+          expect(res.body.proof.cryptosuite === 'eddsa-rdfc-2022')
+          expect(res.body.proof.type === 'DataIntegrityProof')
+        })
+        .expect(200)
+    })
+
     it('adds both ed25519 and eddsa proofs', async () => {
       await request(app)
         .post(
@@ -205,7 +218,6 @@ describe('api', () => {
         .send(getUnsignedVCWithStatus())
         .expect('Content-Type', /json/)
         .expect((res) => {
-          console.log(res.body.proof)
           expect(res.body.issuer.id).to.eql('did:web:example.com')
           expect(res.body.proof.length).to.eql(2)
           expect(
