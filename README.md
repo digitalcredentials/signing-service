@@ -412,7 +412,7 @@ Try it out with this CURL command, which you simply paste into the terminal (onc
 <summary>Show code</summary>
   
 ```
-curl --location 'http://localhost:4006/instance/test/credentials/sign' \
+curl --location 'http://localhost:4006/instance/test/credentials/sign?suite=eddsa2022' \
 --header 'Content-Type: application/json' \
 --data-raw '{
   "@context": [
@@ -462,7 +462,9 @@ curl --location 'http://localhost:4006/instance/test/credentials/sign' \
 ```
 </details>
 
-This should return a fully formed and signed credential printed to the terminal, that should look something like this (it may be all smushed up, but you can format it in something like [json lint](https://jsonlint.com):
+NOTE: CURL can get a bit clunky if you want to experiment - you might consider trying [Postman](https://www.postman.com/downloads/) which makes it a bit easier to construct and send http calls.
+
+That curl should return a fully formed and signed credential printed to the terminal, that should look something like this (it may be all smushed up, but you can format it in something like [json lint](https://jsonlint.com):
 
 <details> 
 <summary>Show code</summary>
@@ -524,7 +526,102 @@ This should return a fully formed and signed credential printed to the terminal,
 ```
 </details>
 
-NOTE: CURL can get a bit clunky if you want to experiment - you might consider trying [Postman](https://www.postman.com/downloads/) which makes it a bit easier to construct and send http calls.
+You may have noticed the 'suite' query parameter on the url:
+
+http://localhost:4006/instance/test/credentials/sign?<b>suite=eddsa2022</b>
+
+You can specify either eddsa2022 or ed25519.  If you specify neither (you don't provide the query parameter) it defaults to ed25519.
+
+Very cool is that you can specify both if you like:
+
+http://localhost:4006/instance/test/credentials/sign?<b>suite=eddsa2022&suite=ed25519</b>
+
+Which will add two proofs to your credential (two signatures), like so:
+
+<details> 
+<summary>Show code</summary>
+{
+    "@context": [
+        "https://www.w3.org/2018/credentials/v1",
+        "https://purl.imsglobal.org/spec/ob/v3p0/context-3.0.2.json",
+        "https://w3id.org/security/suites/ed25519-2020/v1",
+        "https://w3id.org/security/data-integrity/v2"
+    ],
+    "id": "urn:uuid:2fe53dc9-b2ec-4939-9b2c-0d00f6663b6c",
+    "type": [
+        "VerifiableCredential",
+        "OpenBadgeCredential"
+    ],
+    "name": "DCC Test Credential",
+    "issuer": {
+        "type": [
+            "Profile"
+        ],
+        "id": "did:key:z6MknNQD1WHLGGraFi6zcbGevuAgkVfdyCdtZnQTGWVVvR5Q",
+        "name": "Digital Credentials Consortium Test Issuer",
+        "url": "https://dcconsortium.org",
+        "image": "https://user-images.githubusercontent.com/752326/230469660-8f80d264-eccf-4edd-8e50-ea634d407778.png"
+    },
+    "issuanceDate": "2023-08-02T17:43:32.903Z",
+    "credentialSubject": {
+        "type": [
+            "AchievementSubject"
+        ],
+        "achievement": {
+            "id": "urn:uuid:bd6d9316-f7ae-4073-a1e5-2f7f5bd22922",
+            "type": [
+                "Achievement"
+            ],
+            "achievementType": "Diploma",
+            "name": "Badge",
+            "description": "This is a sample credential issued by the Digital Credentials Consortium to demonstrate the functionality of Verifiable Credentials for wallets and verifiers.",
+            "criteria": {
+                "type": "Criteria",
+                "narrative": "This credential was issued to a student that demonstrated proficiency in the Python programming language that occurred from **February 17, 2023** to **June 12, 2023**."
+            },
+            "image": {
+                "id": "https://user-images.githubusercontent.com/752326/214947713-15826a3a-b5ac-4fba-8d4a-884b60cb7157.png",
+                "type": "Image"
+            }
+        },
+        "name": "Jane Doe"
+    },
+    "proof": [
+        {
+            "type": "Ed25519Signature2020",
+            "created": "2025-04-02T13:31:46Z",
+            "verificationMethod": "did:key:z6MknNQD1WHLGGraFi6zcbGevuAgkVfdyCdtZnQTGWVVvR5Q#z6MknNQD1WHLGGraFi6zcbGevuAgkVfdyCdtZnQTGWVVvR5Q",
+            "proofPurpose": "assertionMethod",
+            "proofValue": "z4Ycb2YJpq6bxKozi7XqQRJfwePsrz21q3uEXp1Urq6Atn7VXYWGDAni3xVx4LsatTaCQ3YEyKpe61yz3ANKSuY5P"
+        },
+        {
+            "type": "DataIntegrityProof",
+            "created": "2025-04-02T13:31:46Z",
+            "verificationMethod": "did:key:z6MknNQD1WHLGGraFi6zcbGevuAgkVfdyCdtZnQTGWVVvR5Q#z6MknNQD1WHLGGraFi6zcbGevuAgkVfdyCdtZnQTGWVVvR5Q",
+            "cryptosuite": "eddsa-rdfc-2022",
+            "proofPurpose": "assertionMethod",
+            "proofValue": "z2T79HKV6voJdm8z58HDmXYnZCXxG95rx37KWGrL467zCAvZRhVX1ekSYeFL1L1rNxeYNKJnQM8gGtWvujcmPTTtg"
+        }
+    ]
+}
+</details>
+
+Including both signatures provides a measure of [Cryptographic Agility](https://en.wikipedia.org/wiki/Cryptographic_agility) - essentially allowing verifiers to choose which proof (or both!) to check.
+
+The two signature types are both based on the same Edwards curve - the difference is only in how the details of the signature are encoded in the proof. The eddsa2022 suite is a newer and more modular encoding and likely what you want to use if you are just starting out.
+
+You can read more about the suites here:
+
+<b>ed25519-2020</b>
+
+[https://github.com/digitalbazaar/ed25519-signature-2020](https://github.com/digitalbazaar/ed25519-signature-2020)
+
+<b>eddsa-2022</b>
+
+[https://github.com/digitalbazaar/ed25519-multikey](https://github.com/digitalbazaar/ed25519-multikey)
+[https://github.com/digitalbazaar/eddsa-2022-cryptosuite](https://github.com/digitalbazaar/eddsa-2022-cryptosuite)
+[https://github.com/digitalbazaar/data-integrity](https://github.com/digitalbazaar/data-integrity)
+
 
 
 ### Learner Credential Wallet
