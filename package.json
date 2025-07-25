@@ -26,7 +26,6 @@
     "@digitalbazaar/vc": "^7.2.0",
     "@digitalcredentials/security-document-loader": "^8.0.0",
     "axios": "^1.11.0",
-    "base32-encode": "^2.0.0",
     "bnid": "^3.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
