@@ -5,7 +5,6 @@ import * as Ed25519Multikey from '@digitalbazaar/ed25519-multikey'
 import { DataIntegrityProof } from '@digitalbazaar/data-integrity'
 import { cryptosuite as eddsaRdfc2022CryptoSuite } from '@digitalbazaar/eddsa-rdfc-2022-cryptosuite'
 
-import { CryptoLD } from 'crypto-ld'
 import { driver as keyDriver } from '@digitalbazaar/did-method-key'
 import { driver as webDriver } from '@digitalbazaar/did-method-web'
 import { securityLoader } from '@digitalcredentials/security-document-loader'
@@ -15,10 +14,6 @@ import { issue as signVC } from '@digitalbazaar/vc'
 
 let ISSUER_INSTANCES = { eddsa2022: {}, ed25519: {} }
 const documentLoader = securityLoader().build()
-
-// Crypto library for linked data
-const cryptoLd = new CryptoLD()
-cryptoLd.use(Ed25519VerificationKey2020)
 
 // DID drivers
 const didWebDriver = webDriver()
