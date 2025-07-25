@@ -15,7 +15,6 @@
     "test:health": "node -r dotenv/config healthcheck.js dotenv_config_path=./.env.healthcheck.testing "
   },
   "dependencies": {
-    "@digitalbazaar/cborld": "^8.0.1",
     "@digitalbazaar/data-integrity": "^2.5.0",
     "@digitalbazaar/did-method-key": "^5.2.0",
     "@digitalbazaar/did-method-web": "^1.0.1",
