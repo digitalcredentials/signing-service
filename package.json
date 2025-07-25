@@ -25,7 +25,6 @@
     "@digitalbazaar/eddsa-rdfc-2022-cryptosuite": "^1.2.0",
     "@digitalbazaar/vc": "^7.2.0",
     "@digitalcredentials/security-document-loader": "^8.0.0",
-    "@interop/did-web-resolver": "^5.0.0",
     "axios": "^1.11.0",
     "base32-encode": "^2.0.0",
     "bnid": "^3.0.0",
