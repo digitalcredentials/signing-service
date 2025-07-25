@@ -7,7 +7,7 @@ import { cryptosuite as eddsaRdfc2022CryptoSuite } from '@digitalbazaar/eddsa-rd
 
 import { CryptoLD } from 'crypto-ld'
 import { driver as keyDriver } from '@digitalbazaar/did-method-key'
-import { driver as webDriver } from '@interop/did-web-resolver'
+import { driver as webDriver } from '@digitalbazaar/did-method-web'
 import { securityLoader } from '@digitalcredentials/security-document-loader'
 import { getTenantSeed } from './config.js'
 import SigningException from './SigningException.js'
@@ -21,13 +21,15 @@ const cryptoLd = new CryptoLD()
 cryptoLd.use(Ed25519VerificationKey2020)
 
 // DID drivers
-const didWebDriver = webDriver({ cryptoLd })
+const didWebDriver = webDriver()
 const didKeyDriver = keyDriver()
 
-didKeyDriver.use({
+const driverConfig = {
   multibaseMultikeyHeader: 'z6Mk',
   fromMultibase: Ed25519VerificationKey2020.from
-})
+}
+didKeyDriver.use(driverConfig)
+didWebDriver.use(driverConfig)
 
 /* FOR TESTING */
 export const clearIssuerInstances = () => {
@@ -122,24 +124,23 @@ const buildEddsa2022IssuerInstance = async (didDocument, key) => {
 }
 
 export async function getSigningMaterial({ method, seed, url }) {
-  let did, key
-  if (method === 'web') {
-    did = await didWebDriver.generate({ seed, url })
-    key = did.methodFor({ purpose: 'assertionMethod' })
-  } else {
-    const verificationKeyPair = await Ed25519VerificationKey2020.generate({
-      seed
-    })
-    did = await didKeyDriver.fromKeyPair({ verificationKeyPair })
-    const assertionMethod = did.methodFor({ purpose: 'assertionMethod' })
-    key = await Ed25519VerificationKey2020.from({
-      type: assertionMethod.type,
-      controller: assertionMethod.controller,
-      id: assertionMethod.id,
-      publicKeyMultibase: assertionMethod.publicKeyMultibase,
-      privateKeyMultibase: verificationKeyPair.privateKeyMultibase
-    })
-  }
+  const verificationKeyPair = await Ed25519VerificationKey2020.generate({
+    seed
+  })
+  const did =
+    method === 'web'
+      ? await didWebDriver.fromKeyPair({ url, verificationKeyPair })
+      : await didKeyDriver.fromKeyPair({ verificationKeyPair })
+
+  const assertionMethod = did.methodFor({ purpose: 'assertionMethod' })
+  const key = await Ed25519VerificationKey2020.from({
+    type: assertionMethod.type,
+    controller: assertionMethod.controller,
+    id: assertionMethod.id,
+    publicKeyMultibase: assertionMethod.publicKeyMultibase,
+    privateKeyMultibase: verificationKeyPair.privateKeyMultibase
+  })
+
   return { didDocument: did.didDocument, key }
 }
 
