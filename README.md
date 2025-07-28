@@ -2,7 +2,7 @@
 
 [![Build status](https://img.shields.io/github/actions/workflow/status/digitalcredentials/signing-service/main.yml?branch=main)](https://github.com/digitalcredentials/signing-service/actions?query=workflow%3A%22Node.js+CI%22)
 
-IMPORTANT NOTE ABOUT VERSIONING: If you are using a Docker Hub image of this repository, make sure you are reading the version of this README that corresponds to your Docker Hub version.  If, for example, you are using the image `digitalcredentials/signing-service:1.1.0` then you'll want to use the corresponding tagged repo: [https://github.com/digitalcredentials/signing-service/tree/v1.1.0](https://github.com/digitalcredentials/signing-service/tree/v1.1.0). If you are new here, then just read on...
+IMPORTANT NOTE ABOUT VERSIONING: If you are using a Docker Hub image of this repository, make sure you are reading the version of this README that corresponds to your Docker Hub version.  If, for example, you are using the image `digitalcredentials/signing-service:1.2.0` then you'll want to use the corresponding tagged repo: [https://github.com/digitalcredentials/signing-service/tree/v1.2.0](https://github.com/digitalcredentials/signing-service/tree/v1.2.0). If you are new here, then just read on...
 
 ## Table of Contents
 
@@ -34,6 +34,7 @@ Use this express server to sign [Verifiable Credentials](https://www.w3.org/TR/v
 
 NEW: as of version 1.0.0 the signing-service works with both version 1 and version 2 Verifiable Credentials.
 NEWER: as of version 1.1.0, a new 'suite' query parameter instructs the signing-service to attach proofs with type of either Ed25519SignatureSuite or DataIntegrity (with an Eddsa cryptosuite) - or both!
+NEWEST: as of version 1.2.0, the final versions of the Verifiable Credentials 2.0 and Open Badges version 3.0.3 contexts have been incorporated.
 
 Implements four http endpoints:
 
@@ -72,7 +73,7 @@ You can try this signing-service in about three minutes:
 2. From a terminal prompt, run:
 
 ```
-docker run -dp 4006:4006 digitalcredentials/signing-service:1.1.0
+docker run -dp 4006:4006 digitalcredentials/signing-service:1.2.0
 ```
 
 You can now issue test credentials as explained in the [Sign a Credential](#sign-a-credential) section.
@@ -390,11 +391,11 @@ You can start the script using NPM, like is done with the `start` script in pack
 
 You can directly from the DockerHub image, using a default configuration, with:
 
-  `docker run -dp 4006:4006 digitalcredentials/signing-service:1.1.0`
+  `docker run -dp 4006:4006 digitalcredentials/signing-service:1.2.0`
 
 To run it with your own configuration (like with your own signing keys):
 
-``docker run --env-file .env -dp 4006:4006 digitalcredentials/signing-service:1.1.0`
+``docker run --env-file .env -dp 4006:4006 digitalcredentials/signing-service:1.2.0`
 
 where the `.env` file contains your environment variables. See [.env.example](./.env.example).
 
@@ -646,7 +647,7 @@ We DO NOT provide a `latest` tag so you must provide a tag name (i.e, the versio
 
 To ensure you've got compatible versions of the services and the coordinator, take a look at our [sample compose files](https://github.com/digitalcredentials/docs/blob/main/deployment-guide/DCCDeploymentGuide.md#docker-compose-examples).
 
-If you do ever want to work from the source code in the repository and build your own images, we've tagged the commits in Github that were used to build the corresponding Docker image. So a github tag of v1.1.0 coresponds to a docker image tag of 1.1.0
+If you do ever want to work from the source code in the repository and build your own images, we've tagged the commits in Github that were used to build the corresponding Docker image. So a github tag of v1.2.0 coresponds to a docker image tag of 1.2.0
 
 ## Logging
 
