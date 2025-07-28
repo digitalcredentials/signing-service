@@ -1,5 +1,14 @@
 # signing-service Changelog
 
+## 1.2.0 - 2025-07-28
+
+### Changed
+- update security-document-loader to thereby include latest additions to the VC2 and OBv3 contexts.
+- update all other libs, including dev libs, to latest versions
+- rework did generation to use did-method-web lib rather than interop
+- rework signing material configuration to use did-method-web rather than interop
+- remove unused crypto-ld, base32-encode, cborld libs
+
 ## 1.1.0 - 2025-04-01
 
 ### Added
